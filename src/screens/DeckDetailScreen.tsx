@@ -1,5 +1,5 @@
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RouteProp } from '@react-navigation/native';
+import { RouteProp, useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
 import {
   Alert,
@@ -29,6 +29,8 @@ export default function DeckDetailScreen({ navigation, route }: Props) {
   const [filterLevel, setFilterLevel] = useState<MemoryLevel | null>(null);
 
   const reload = useCallback(() => setWords(getWords(deckId)), [deckId]);
+
+  useFocusEffect(reload);
 
   const filtered = filterLevel === null ? words : words.filter((w) => w.level === filterLevel);
 

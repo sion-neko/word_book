@@ -91,19 +91,17 @@ export default function HomeScreen({ navigation }: Props) {
             {weakWords.length > 0 && query === '' && (
               <TouchableOpacity
                 activeOpacity={0.85}
-                onPress={() => navigation.navigate('Study', { words: weakWords, title: '苦手な復習' })}
-                style={[styles.reviewBtn, t.shadowSoft, { backgroundColor: t.ink }]}
+                onPress={() => navigation.navigate('Study', { words: weakWords, title: '今日の問題' })}
+                style={[styles.reviewBtn, t.shadowSoft, { backgroundColor: t.accent }]}
               >
-                <View style={[styles.reviewIcon, { backgroundColor: hexA('#C8553D', 0.9) }]}>
-                  <Icon name="sparkle" size={22} color="#fff" strokeWidth={1.8} />
+                <View style={[styles.reviewIcon, { backgroundColor: hexA('#ffffff', 0.22) }]}>
+                  <Icon name="calendar" size={22} color="#fff" strokeWidth={1.8} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.dark ? t.ink : '#fff', fontFamily: t.font(700), fontSize: 16 }}>
-                    苦手な問題を復習
-                  </Text>
+                  <Text style={{ color: '#fff', fontFamily: t.font(700), fontSize: 16 }}>今日の問題</Text>
                   <Text
                     style={{
-                      color: t.dark ? t.sub : 'rgba(255,255,255,0.7)',
+                      color: 'rgba(255,255,255,0.75)',
                       fontFamily: t.mono(400),
                       fontSize: 13,
                       marginTop: 1,
@@ -112,7 +110,7 @@ export default function HomeScreen({ navigation }: Props) {
                     {weakWords.length}問をまとめて出題
                   </Text>
                 </View>
-                <Icon name="arrow-right" size={20} color={t.dark ? t.sub : 'rgba(255,255,255,0.7)'} strokeWidth={2} />
+                <Icon name="arrow-right" size={20} color="rgba(255,255,255,0.75)" strokeWidth={2} />
               </TouchableOpacity>
             )}
 

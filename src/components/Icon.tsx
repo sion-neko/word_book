@@ -21,6 +21,7 @@ export type IconName =
   | 'flip'
   | 'layers'
   | 'sparkle'
+  | 'calendar'
   | 'arrow-right'
   | 'headphones'
   | 'skip-back'
@@ -190,6 +191,15 @@ export default function Icon({ name, size = 22, color = '#000', strokeWidth = 1.
       return (
         <Svg {...common}>
           <Path d="M12 4l1.6 4.4L18 10l-4.4 1.6L12 16l-1.6-4.4L6 10l4.4-1.6L12 4z" {...stroke} />
+        </Svg>
+      );
+    case 'calendar':
+      return (
+        <Svg {...common}>
+          <Rect x={4} y={5.5} width={16} height={14} rx={2.2} {...stroke} />
+          <Path d="M4 9.5h16" {...stroke} />
+          <Path d="M8 3.5v3M16 3.5v3" {...stroke} />
+          <Circle cx={12} cy={14.5} r={1.6} fill={color} />
         </Svg>
       );
     case 'arrow-right':

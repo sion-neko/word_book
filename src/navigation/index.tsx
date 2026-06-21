@@ -1,24 +1,30 @@
-import { NavigationContainer } from '@react-navigation/native';
+import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
-import DeckDetailScreen from '../screens/DeckDetailScreen';
-import DecksScreen from '../screens/DecksScreen';
-import ListenScreen from '../screens/ListenScreen';
+import AudioModeScreen from '../screens/AudioModeScreen';
+import FolderScreen from '../screens/FolderScreen';
+import HomeScreen from '../screens/HomeScreen';
 import SettingsScreen from '../screens/SettingsScreen';
-import WordFormScreen from '../screens/WordFormScreen';
+import StudyScreen from '../screens/StudyScreen';
+import { useThemeSettings } from '../theme/ThemeContext';
 import { RootStackParamList } from '../types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function Navigation() {
+  const { theme: t, dark } = useThemeSettings();
+  const navTheme = dark
+    ? { ...DarkTheme, colors: { ...DarkTheme.colors, background: t.bg } }
+    : { ...DefaultTheme, colors: { ...DefaultTheme.colors, background: t.bg } };
+
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={navTheme}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Decks" component={DecksScreen} />
-        <Stack.Screen name="DeckDetail" component={DeckDetailScreen} />
-        <Stack.Screen name="WordForm" component={WordFormScreen} />
-        <Stack.Screen name="Listen" component={ListenScreen} />
+        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Folder" component={FolderScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
+        <Stack.Screen name="Study" component={StudyScreen} options={{ presentation: 'modal' }} />
+        <Stack.Screen name="AudioMode" component={AudioModeScreen} options={{ presentation: 'modal' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

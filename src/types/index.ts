@@ -3,6 +3,7 @@ export type MemoryLevel = 0 | 1 | 2 | 3 | 4;
 export interface Deck {
   id: number;
   name: string;
+  color: string;
   created_at: string;
   word_count?: number;
 }
@@ -13,15 +14,21 @@ export interface Word {
   question: string;
   answer: string;
   reading: string;
+  lang: 'ja-JP' | 'en-US';
   level: MemoryLevel;
   created_at: string;
 }
 
+export interface WeakWord extends Word {
+  deck_name: string;
+  deck_color: string;
+}
+
 export type RootStackParamList = {
-  Decks: undefined;
-  DeckDetail: { deckId: number; deckName: string };
-  WordForm: { deckId: number; wordId?: number };
-  Listen: { deckId: number; deckName: string };
+  Home: undefined;
+  Folder: { deckId: number; deckName: string };
+  Study: { words: Word[]; title: string };
+  AudioMode: { words: Word[]; title: string };
   Settings: undefined;
 };
 
@@ -33,10 +40,19 @@ export const LEVEL_LABELS: Record<MemoryLevel, string> = {
   4: '完璧',
 };
 
+// 5段階のグラデーション(苦手→完璧)。デザインの mastery scale の配色をそのまま採用。
 export const LEVEL_COLORS: Record<MemoryLevel, string> = {
-  0: '#9CA3AF',
-  1: '#EF4444',
-  2: '#F59E0B',
-  3: '#10B981',
-  4: '#3B82F6',
+  0: '#C8553D',
+  1: '#CB7E3D',
+  2: '#CC9A3B',
+  3: '#8AA055',
+  4: '#5E9C6B',
 };
+
+export const ALL_LEVELS: MemoryLevel[] = [0, 1, 2, 3, 4];
+export const TOP_LEVEL: MemoryLevel = 4;
+
+// 「苦手」= 未学習・難しい。Home の復習ショートカット/Folderの苦手バッジ/Study結果の再挑戦で共通利用。
+export function isWeak(level: MemoryLevel): boolean {
+  return level <= 1;
+}

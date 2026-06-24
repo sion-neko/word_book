@@ -32,7 +32,7 @@ export default function WordRow({
   const t = useTheme();
   const translateX = useRef(new Animated.Value(0)).current;
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const moved = useRef(false);
+  const touchStart = useRef({ x: 0, y: 0 });
 
   const clearLongPress = () => {
     if (longPressTimer.current) {
@@ -45,37 +45,36 @@ export default function WordRow({
     Animated.timing(translateX, { toValue: 0, duration: 220, useNativeDriver: true }).start();
   };
 
+  // onTouchStart/Move/End は素のタッチイベントで、レスポンダを奪わないため
+  // 親 ScrollView の縦スクロールを妨げずに長押し検出だけ行える。
+  const handleTouchStart = (e: { nativeEvent: { pageX: number; pageY: number } }) => {
+    touchStart.current = { x: e.nativeEvent.pageX, y: e.nativeEvent.pageY };
+    longPressTimer.current = setTimeout(() => {
+      longPressTimer.current = null;
+      onLongPress();
+    }, LONG_PRESS_MS);
+  };
+  const handleTouchMove = (e: { nativeEvent: { pageX: number; pageY: number } }) => {
+    const dx = e.nativeEvent.pageX - touchStart.current.x;
+    const dy = e.nativeEvent.pageY - touchStart.current.y;
+    if (Math.abs(dx) > 7 || Math.abs(dy) > 7) clearLongPress();
+  };
+
   const panResponder = useRef(
     PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
+      onStartShouldSetPanResponder: () => false,
       onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dx) > 6 && Math.abs(g.dx) > Math.abs(g.dy),
-      onPanResponderGrant: () => {
-        moved.current = false;
-        longPressTimer.current = setTimeout(() => {
-          if (!moved.current) {
-            clearLongPress();
-            onLongPress();
-          }
-        }, LONG_PRESS_MS);
-      },
+      onPanResponderGrant: () => clearLongPress(),
       onPanResponderMove: (_, g) => {
-        if (Math.abs(g.dx) > 7 || Math.abs(g.dy) > 7) {
-          moved.current = true;
-          clearLongPress();
-        }
         const next = g.dx < 0 ? Math.max(g.dx, -SWIPE_MAX) : 0;
         translateX.setValue(next);
       },
       onPanResponderRelease: (_, g) => {
-        clearLongPress();
         const swiped = g.dx < -SWIPE_THRESHOLD;
         snapBack();
         if (swiped) onSwipeDelete();
       },
-      onPanResponderTerminate: () => {
-        clearLongPress();
-        snapBack();
-      },
+      onPanResponderTerminate: () => snapBack(),
     })
   ).current;
 
@@ -133,7 +132,14 @@ export default function WordRow({
       <View style={[styles.backdrop, { backgroundColor: LEVEL_COLORS[0] }]}>
         <Icon name="trash" size={20} color="#fff" strokeWidth={2} />
       </View>
-      <Animated.View {...panResponder.panHandlers} style={[rowStyle, { transform: [{ translateX }] }]}>
+      <Animated.View
+        {...panResponder.panHandlers}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={clearLongPress}
+        onTouchCancel={clearLongPress}
+        style={[rowStyle, { transform: [{ translateX }] }]}
+      >
         {content}
       </Animated.View>
     </View>

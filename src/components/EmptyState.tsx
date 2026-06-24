@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { useTheme } from '../theme/ThemeContext';
 
 interface Props {
   message: string;
@@ -7,10 +8,11 @@ interface Props {
 }
 
 export default function EmptyState({ message, sub }: Props) {
+  const t = useTheme();
   return (
     <View style={styles.container}>
-      <Text style={styles.message}>{message}</Text>
-      {sub && <Text style={styles.sub}>{sub}</Text>}
+      <Text style={[styles.message, { color: t.ink, fontFamily: t.font(600) }]}>{message}</Text>
+      {sub && <Text style={[styles.sub, { color: t.faint, fontFamily: t.font(400) }]}>{sub}</Text>}
     </View>
   );
 }
@@ -24,14 +26,11 @@ const styles = StyleSheet.create({
   },
   message: {
     fontSize: 17,
-    fontWeight: '600',
-    color: '#374151',
     textAlign: 'center',
   },
   sub: {
     marginTop: 8,
     fontSize: 14,
-    color: '#9CA3AF',
     textAlign: 'center',
   },
 });

@@ -82,8 +82,8 @@ export function createDeck(name: string, color: string = FOLDER_COLORS[0]): numb
   return result.lastInsertRowId;
 }
 
-export function updateDeck(id: number, name: string): void {
-  db.runSync('UPDATE decks SET name = ? WHERE id = ?', [name, id]);
+export function updateDeck(id: number, name: string, color: string): void {
+  db.runSync('UPDATE decks SET name = ?, color = ? WHERE id = ?', [name, color, id]);
 }
 
 export function deleteDeck(id: number): void {
@@ -117,11 +117,12 @@ export function createWord(
   question: string,
   answer: string,
   reading: string = '',
-  lang: string = 'ja-JP'
+  lang: string = 'ja-JP',
+  level: MemoryLevel = 0
 ): number {
   const result = db.runSync(
-    'INSERT INTO words (deck_id, question, answer, reading, lang) VALUES (?, ?, ?, ?, ?)',
-    [deckId, question, answer, reading, lang]
+    'INSERT INTO words (deck_id, question, answer, reading, lang, level) VALUES (?, ?, ?, ?, ?, ?)',
+    [deckId, question, answer, reading, lang, level]
   );
   return result.lastInsertRowId;
 }
@@ -131,11 +132,12 @@ export function updateWord(
   question: string,
   answer: string,
   reading: string,
-  lang: string = 'ja-JP'
+  lang: string = 'ja-JP',
+  level: MemoryLevel = 0
 ): void {
   db.runSync(
-    'UPDATE words SET question = ?, answer = ?, reading = ?, lang = ? WHERE id = ?',
-    [question, answer, reading, lang, id]
+    'UPDATE words SET question = ?, answer = ?, reading = ?, lang = ?, level = ? WHERE id = ?',
+    [question, answer, reading, lang, level, id]
   );
 }
 

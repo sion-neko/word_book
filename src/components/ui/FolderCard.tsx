@@ -10,15 +10,17 @@ interface Props {
   deck: Deck;
   words: Word[];
   onPress: () => void;
+  onLongPress?: () => void;
 }
 
-export default function FolderCard({ deck, words, onPress }: Props) {
+export default function FolderCard({ deck, words, onPress, onLongPress }: Props) {
   const t = useTheme();
   const weak = words.filter((w) => isWeak(w.level)).length;
 
   return (
     <TouchableOpacity
       onPress={onPress}
+      onLongPress={onLongPress}
       activeOpacity={0.85}
       style={[styles.card, t.shadowSoft, { backgroundColor: t.surface }]}
     >

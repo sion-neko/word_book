@@ -3,8 +3,6 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   Alert,
-  Modal,
-  Pressable,
   ScrollView,
   StyleSheet,
   Switch,
@@ -16,6 +14,7 @@ import Icon from '../components/Icon';
 import EmptyState from '../components/EmptyState';
 import AudioButton from '../components/ui/AudioButton';
 import Chip from '../components/ui/Chip';
+import ConfirmDialog from '../components/ui/ConfirmDialog';
 import Field from '../components/ui/Field';
 import Header from '../components/ui/Header';
 import IconButton from '../components/ui/IconButton';
@@ -139,9 +138,9 @@ export default function FolderScreen({ navigation, route }: Props) {
 
   const saveCard = (data: { id?: number; question: string; answer: string; reading: string; lang: string; level: MemoryLevel }) => {
     if (data.id) {
-      updateWord(data.id, data.question, data.answer, data.reading, data.lang);
+      updateWord(data.id, data.question, data.answer, data.reading, data.lang, data.level);
     } else {
-      createWord(deckId, data.question, data.answer, data.reading, data.lang);
+      createWord(deckId, data.question, data.answer, data.reading, data.lang, data.level);
     }
     setEditing({ visible: false, word: null });
     reload();
@@ -294,6 +293,7 @@ export default function FolderScreen({ navigation, route }: Props) {
       <ConfirmDialog
         visible={confirm !== null}
         label={confirm?.label ?? ''}
+        confirmColor={DANGER}
         onCancel={() => setConfirm(null)}
         onConfirm={confirmDelete}
       />
@@ -306,38 +306,6 @@ export default function FolderScreen({ navigation, route }: Props) {
         onDelete={deleteCard}
       />
     </View>
-  );
-}
-
-function ConfirmDialog({
-  visible,
-  label,
-  onCancel,
-  onConfirm,
-}: {
-  visible: boolean;
-  label: string;
-  onCancel: () => void;
-  onConfirm: () => void;
-}) {
-  const t = useTheme();
-  return (
-    <Modal transparent visible={visible} animationType="fade" onRequestClose={onCancel}>
-      <Pressable style={styles.confirmBackdrop} onPress={onCancel}>
-        <Pressable style={[styles.confirmCard, t.shadow, { backgroundColor: t.surface }]} onPress={() => {}}>
-          <Text style={[styles.confirmLabel, { color: t.ink, fontFamily: t.font(700) }]}>{label}</Text>
-          <Text style={{ color: t.sub, fontFamily: t.font(400), fontSize: 13, textAlign: 'center', marginTop: 6 }}>
-            この操作は取り消せません
-          </Text>
-          <TouchableOpacity onPress={onConfirm} style={[styles.confirmBtn, { backgroundColor: DANGER }]}>
-            <Text style={{ color: '#fff', fontFamily: t.font(700), fontSize: 16 }}>削除する</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={onCancel} style={[styles.confirmBtn, { backgroundColor: t.pill }]}>
-            <Text style={{ color: t.ink, fontFamily: t.font(700), fontSize: 16 }}>キャンセル</Text>
-          </TouchableOpacity>
-        </Pressable>
-      </Pressable>
-    </Modal>
   );
 }
 
@@ -467,10 +435,6 @@ const styles = StyleSheet.create({
   hint: { fontSize: 12, textAlign: 'center', marginTop: 14 },
   bulkBar: { flexDirection: 'row', gap: 10, padding: 14, paddingBottom: 28, borderTopWidth: 0.5 },
   bulkBtn: { flex: 1, height: 50, borderRadius: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7 },
-  confirmBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', alignItems: 'center', justifyContent: 'flex-end', padding: 16 },
-  confirmCard: { width: '100%', maxWidth: 380, borderRadius: 20, padding: 22, gap: 10 },
-  confirmLabel: { fontSize: 16.5, textAlign: 'center', lineHeight: 24 },
-  confirmBtn: { height: 50, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginTop: 6 },
   tagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 22 },
   tagPick: { height: 40, paddingHorizontal: 16, borderRadius: 999, alignItems: 'center', justifyContent: 'center' },
   deleteBtn: { height: 50, borderRadius: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },

@@ -31,8 +31,8 @@ export default function AudioModeScreen({ navigation, route }: Props) {
   const [phase, setPhase] = useState<'q' | 'a'>('q');
   const [isPlaying, setIsPlaying] = useState(false);
   const isPlayingRef = useRef(false);
-  const [rate, setRate] = useState(1);
-  const rateRef = useRef(1);
+  const [rate, setRate] = useState(() => parseFloat(getSetting('playback_speed') ?? '1.0'));
+  const rateRef = useRef(rate);
   const [loop, setLoop] = useState(true);
   const loopRef = useRef(true);
 

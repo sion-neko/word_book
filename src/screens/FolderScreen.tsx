@@ -251,7 +251,7 @@ export default function FolderScreen({ navigation, route }: Props) {
                 selectMode={selectMode}
                 selected={selected.has(item.id)}
                 onToggleSelect={() => toggleSelect(item.id)}
-                onLongPress={() => setEditing({ visible: true, word: item })}
+                onPress={() => setEditing({ visible: true, word: item })}
                 onSwipeDelete={() => handleSwipeDelete(item)}
               />
             ))}
@@ -263,7 +263,7 @@ export default function FolderScreen({ navigation, route }: Props) {
         )}
 
         {!selectMode && list.length > 0 && (
-          <Text style={[styles.hint, { color: t.faint }]}>長押しで編集 ・ 左スワイプで削除</Text>
+          <Text style={[styles.hint, { color: t.faint }]}>タップで編集 ・ 左スワイプで削除</Text>
         )}
       </ScrollView>
 

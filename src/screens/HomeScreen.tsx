@@ -223,12 +223,10 @@ function FolderSheet({
           <TouchableOpacity
             key={c}
             onPress={() => setColor(c)}
-            style={[
-              styles.colorSwatch,
-              { backgroundColor: c },
-              color === c && { borderWidth: 3, borderColor: t.bg, shadowColor: c, shadowOpacity: 1, shadowRadius: 0 },
-            ]}
-          />
+            style={[styles.colorSwatch, { backgroundColor: c }]}
+          >
+            {color === c && <Icon name="check" size={18} color="#fff" strokeWidth={2.8} />}
+          </TouchableOpacity>
         ))}
       </View>
 
@@ -277,7 +275,7 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 13, letterSpacing: 0.5 },
   colorLabel: { fontSize: 12.5, letterSpacing: 0.5, marginTop: 6, marginBottom: 10, marginLeft: 4 },
   colorRow: { flexDirection: 'row', gap: 14, paddingHorizontal: 4, paddingBottom: 10, flexWrap: 'wrap' },
-  colorSwatch: { width: 38, height: 38, borderRadius: 999 },
+  colorSwatch: { width: 38, height: 38, borderRadius: 999, alignItems: 'center', justifyContent: 'center' },
   deleteBtn: {
     height: 50,
     borderRadius: 14,

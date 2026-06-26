@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import {
-  Animated,
-  Easing,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -20,35 +20,19 @@ interface Props {
   children: React.ReactNode;
 }
 
-const EASING = Easing.bezier(0.32, 0.72, 0, 1);
-
 export default function Sheet({ visible, onClose, title, trailing, children }: Props) {
   const t = useTheme();
-  const [mounted, setMounted] = useState(visible);
-  const progress = useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
-    if (visible) {
-      setMounted(true);
-      Animated.timing(progress, { toValue: 1, duration: 280, easing: EASING, useNativeDriver: true }).start();
-    } else {
-      Animated.timing(progress, { toValue: 0, duration: 220, easing: EASING, useNativeDriver: true }).start(() => {
-        setMounted(false);
-      });
-    }
-  }, [visible]);
-
-  if (!mounted) return null;
-
-  const translateY = progress.interpolate({ inputRange: [0, 1], outputRange: [600, 0] });
+  if (!visible) return null;
 
   return (
-    <Modal transparent visible animationType="none" onRequestClose={onClose}>
-      <View style={styles.wrap}>
-        <Animated.View style={[styles.backdrop, { opacity: progress }]}>
-          <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
-        </Animated.View>
-        <Animated.View style={[styles.sheet, { backgroundColor: t.bg, transform: [{ translateY }] }]}>
+    <Modal transparent visible onRequestClose={onClose}>
+      <KeyboardAvoidingView
+        style={styles.wrap}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <Pressable style={[styles.backdrop, StyleSheet.absoluteFill]} onPress={onClose} />
+        <View style={[styles.sheet, { backgroundColor: t.bg }]}>
           <View style={styles.header}>
             <TouchableOpacity onPress={onClose} hitSlop={8}>
               <Text style={{ color: t.accentInk, fontSize: 16, fontFamily: t.font(600) }}>キャンセル</Text>
@@ -61,16 +45,16 @@ export default function Sheet({ visible, onClose, title, trailing, children }: P
           <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
             {children}
           </ScrollView>
-        </Animated.View>
-      </View>
+        </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: { flex: 1, justifyContent: 'flex-end' },
-  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.4)' },
-  sheet: { maxHeight: '92%', borderTopLeftRadius: 26, borderTopRightRadius: 26 },
+  wrap: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
+  backdrop: { backgroundColor: 'rgba(0,0,0,0.4)' },
+  sheet: { width: '100%', maxHeight: '85%', borderRadius: 26, zIndex: 1 },
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 },
   title: { flex: 1, textAlign: 'center', fontSize: 16 },
   trailing: { minWidth: 60, alignItems: 'flex-end' },

@@ -1,7 +1,7 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useState } from 'react';
-import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Icon from '../components/Icon';
 import EmptyState from '../components/EmptyState';
 import ConfirmDialog from '../components/ui/ConfirmDialog';
@@ -26,7 +26,6 @@ export default function HomeScreen({ navigation }: Props) {
   const [decks, setDecks] = useState<Deck[]>([]);
   const [wordsByDeck, setWordsByDeck] = useState<Record<number, Word[]>>({});
   const [weakWords, setWeakWords] = useState<WeakWord[]>([]);
-  const [query, setQuery] = useState('');
   const [folderSheet, setFolderSheet] = useState<{ visible: boolean; deck: Deck | null }>({
     visible: false,
     deck: null,
@@ -46,7 +45,6 @@ export default function HomeScreen({ navigation }: Props) {
 
   useFocusEffect(reload);
 
-  const shown = decks.filter((d) => d.name.toLowerCase().includes(query.toLowerCase()));
   const totalWords = decks.reduce((n, d) => n + (wordsByDeck[d.id]?.length ?? 0), 0);
 
   const handleSaveFolder = (name: string, color: string) => {
@@ -88,7 +86,7 @@ export default function HomeScreen({ navigation }: Props) {
       />
 
       <FlatList
-        data={shown}
+        data={decks}
         keyExtractor={(item) => String(item.id)}
         contentContainerStyle={styles.listContent}
         renderItem={({ item }) => (
@@ -101,18 +99,7 @@ export default function HomeScreen({ navigation }: Props) {
         )}
         ListHeaderComponent={
           <>
-            <View style={[styles.searchBar, t.shadowSoft, { backgroundColor: t.fieldBg }]}>
-              <Icon name="search" size={18} color={t.faint} />
-              <TextInput
-                value={query}
-                onChangeText={setQuery}
-                placeholder="フォルダを検索"
-                placeholderTextColor={t.faint}
-                style={[styles.searchInput, { color: t.ink, fontFamily: t.font(400) }]}
-              />
-            </View>
-
-            {weakWords.length > 0 && query === '' && (
+            {weakWords.length > 0 && (
               <TouchableOpacity
                 activeOpacity={0.85}
                 onPress={() => navigation.navigate('Study', { words: weakWords, title: '今日の問題' })}
@@ -148,8 +135,8 @@ export default function HomeScreen({ navigation }: Props) {
         }
         ListEmptyComponent={
           <EmptyState
-            message={decks.length === 0 ? 'フォルダがありません' : '該当するフォルダがありません'}
-            sub={decks.length === 0 ? '右上の + から最初のフォルダを作りましょう' : undefined}
+            message="フォルダがありません"
+            sub="右上の + から最初のフォルダを作りましょう"
           />
         }
       />
@@ -246,16 +233,6 @@ function FolderSheet({
 const styles = StyleSheet.create({
   container: { flex: 1 },
   listContent: { paddingHorizontal: 18, paddingBottom: 40 },
-  searchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    paddingVertical: 11,
-    marginBottom: 16,
-  },
-  searchInput: { flex: 1, fontSize: 16, padding: 0 },
   reviewBtn: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -29,6 +29,8 @@ export default function Sheet({ visible, onClose, title, trailing, children }: P
   const t = useTheme();
   const translateY = useRef(new Animated.Value(0)).current;
   const maxHeight = useRef(new Animated.Value(MAX_HEIGHT)).current;
+  const sheetHeightRef = useRef(0);
+  const kbShownRef = useRef(false);
 
   useEffect(() => {
     if (!visible) return;
@@ -36,21 +38,34 @@ export default function Sheet({ visible, onClose, title, trailing, children }: P
     const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
 
     const showSub = Keyboard.addListener(showEvent, (e) => {
+      kbShownRef.current = true;
       const kbHeight = e.endCoordinates.height;
+      const maxH = SCREEN_HEIGHT - kbHeight - 24;
+      const sheetH = sheetHeightRef.current || MAX_HEIGHT;
+      const effectiveH = Math.min(sheetH, maxH);
+      // モーダルの下端がキーボードの上 8px に収まるための最低シフト量
+      const neededShift = SCREEN_HEIGHT / 2 - kbHeight - 8 - effectiveH / 2;
+      // ユーザーが好む軽いシフト（kbHeight/4）
+      const preferredShift = -(kbHeight / 4);
+      // コンテンツが多いときは必要分だけ多くシフト
+      const shift = Math.min(neededShift, preferredShift);
+
       Animated.parallel([
         Animated.timing(translateY, {
-          toValue: -(kbHeight / 4),
+          toValue: shift,
           duration: 180,
           useNativeDriver: true,
         }),
         Animated.timing(maxHeight, {
-          toValue: SCREEN_HEIGHT - kbHeight - 24,
+          toValue: maxH,
           duration: 180,
           useNativeDriver: false,
         }),
       ]).start();
     });
+
     const hideSub = Keyboard.addListener(hideEvent, () => {
+      kbShownRef.current = false;
       Animated.parallel([
         Animated.timing(translateY, {
           toValue: 0,
@@ -64,9 +79,11 @@ export default function Sheet({ visible, onClose, title, trailing, children }: P
         }),
       ]).start();
     });
+
     return () => {
       showSub.remove();
       hideSub.remove();
+      kbShownRef.current = false;
       translateY.setValue(0);
       maxHeight.setValue(MAX_HEIGHT);
     };
@@ -79,7 +96,14 @@ export default function Sheet({ visible, onClose, title, trailing, children }: P
       <View style={styles.wrap}>
         <Pressable style={[styles.backdrop, StyleSheet.absoluteFill]} onPress={onClose} />
         <Animated.View style={[styles.sheetWrap, { transform: [{ translateY }] }]}>
-          <Animated.View style={[styles.sheet, { backgroundColor: t.bg, maxHeight }]}>
+          <Animated.View
+            style={[styles.sheet, { backgroundColor: t.bg, maxHeight }]}
+            onLayout={(e) => {
+              if (!kbShownRef.current) {
+                sheetHeightRef.current = e.nativeEvent.layout.height;
+              }
+            }}
+          >
             <View style={styles.header}>
               <TouchableOpacity onPress={onClose} hitSlop={8}>
                 <Text style={{ color: t.accentInk, fontSize: 16, fontFamily: t.font(600) }}>キャンセル</Text>

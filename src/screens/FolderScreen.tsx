@@ -139,6 +139,7 @@ export default function FolderScreen({ navigation, route }: Props) {
   return (
     <View style={[styles.container, { backgroundColor: t.bg }]}>
       <Header
+        title={deckName}
         onBack={navigation.goBack}
         trailing={
           <View style={styles.headerActions}>
@@ -167,10 +168,6 @@ export default function FolderScreen({ navigation, route }: Props) {
 
       <ScrollView contentContainerStyle={styles.listContent}>
         <View style={styles.identity}>
-          <Text style={[styles.deckName, { color: t.ink, fontFamily: t.font(800) }]}>{deckName}</Text>
-          <Text style={{ color: t.sub, fontFamily: t.mono(400), fontSize: 13, marginVertical: 5 }}>
-            {words.length}問
-          </Text>
           <MasteryBar words={words} />
         </View>
 

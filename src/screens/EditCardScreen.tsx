@@ -75,7 +75,7 @@ export default function EditCardScreen({ navigation, route }: Props) {
       />
 
       <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
-        <Field label="表(問題)" value={question} onChangeText={setQuestion} placeholder="例：abandon" multiline autoFocus />
+        <Field label="表(問題)" value={question} onChangeText={setQuestion} placeholder="例：abandon" multiline autoFocus={!word} />
         <Field label="裏(答え)" value={answer} onChangeText={setAnswer} placeholder="例：〜を捨てる、放棄する" multiline />
 
         <View style={styles.readingRow}>

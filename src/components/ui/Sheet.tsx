@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
-  KeyboardAvoidingView,
+  Animated,
+  Dimensions,
+  Keyboard,
   Modal,
   Platform,
   Pressable,
@@ -10,6 +12,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+
+const MAX_HEIGHT = Dimensions.get('window').height * 0.85;
 import { useTheme } from '../../theme/ThemeContext';
 
 interface Props {
@@ -22,31 +26,57 @@ interface Props {
 
 export default function Sheet({ visible, onClose, title, trailing, children }: Props) {
   const t = useTheme();
+  const translateY = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (!visible) return;
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const showSub = Keyboard.addListener(showEvent, (e) => {
+      Animated.timing(translateY, {
+        toValue: -(e.endCoordinates.height / 2),
+        duration: 180,
+        useNativeDriver: true,
+      }).start();
+    });
+    const hideSub = Keyboard.addListener(hideEvent, () => {
+      Animated.timing(translateY, {
+        toValue: 0,
+        duration: 180,
+        useNativeDriver: true,
+      }).start();
+    });
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+      translateY.setValue(0);
+    };
+  }, [visible, translateY]);
 
   if (!visible) return null;
 
   return (
     <Modal transparent visible onRequestClose={onClose}>
-      <KeyboardAvoidingView
-        style={styles.wrap}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
+      <View style={styles.wrap}>
         <Pressable style={[styles.backdrop, StyleSheet.absoluteFill]} onPress={onClose} />
-        <View style={[styles.sheet, { backgroundColor: t.bg }]}>
-          <View style={styles.header}>
-            <TouchableOpacity onPress={onClose} hitSlop={8}>
-              <Text style={{ color: t.accentInk, fontSize: 16, fontFamily: t.font(600) }}>キャンセル</Text>
-            </TouchableOpacity>
-            <Text style={[styles.title, { color: t.ink, fontFamily: t.font(700) }]} numberOfLines={1}>
-              {title}
-            </Text>
-            <View style={styles.trailing}>{trailing}</View>
+        <Animated.View style={[styles.sheetWrap, { transform: [{ translateY }] }]}>
+          <View style={[styles.sheet, { backgroundColor: t.bg }]}>
+            <View style={styles.header}>
+              <TouchableOpacity onPress={onClose} hitSlop={8}>
+                <Text style={{ color: t.accentInk, fontSize: 16, fontFamily: t.font(600) }}>キャンセル</Text>
+              </TouchableOpacity>
+              <Text style={[styles.title, { color: t.ink, fontFamily: t.font(700) }]} numberOfLines={1}>
+                {title}
+              </Text>
+              <View style={styles.trailing}>{trailing}</View>
+            </View>
+            <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
+              {children}
+            </ScrollView>
           </View>
-          <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
-            {children}
-          </ScrollView>
-        </View>
-      </KeyboardAvoidingView>
+        </Animated.View>
+      </View>
     </Modal>
   );
 }
@@ -54,7 +84,8 @@ export default function Sheet({ visible, onClose, title, trailing, children }: P
 const styles = StyleSheet.create({
   wrap: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
   backdrop: { backgroundColor: 'rgba(0,0,0,0.4)' },
-  sheet: { width: '100%', maxHeight: '85%', borderRadius: 26, zIndex: 1 },
+  sheetWrap: { width: '100%', zIndex: 1 },
+  sheet: { width: '100%', maxHeight: MAX_HEIGHT, borderRadius: 26 },
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 },
   title: { flex: 1, textAlign: 'center', fontSize: 16 },
   trailing: { minWidth: 60, alignItems: 'flex-end' },

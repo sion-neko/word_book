@@ -1,7 +1,7 @@
 import { RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Icon from '../components/Icon';
 import AudioButton from '../components/ui/AudioButton';
 import ConfirmDialog from '../components/ui/ConfirmDialog';
@@ -60,7 +60,10 @@ export default function EditCardScreen({ navigation, route }: Props) {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: t.bg }]}>
+    <KeyboardAvoidingView
+      style={[styles.container, { backgroundColor: t.bg }]}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
       <Header
         title={word ? '問題を編集' : '問題を追加'}
         onBack={() => navigation.goBack()}
@@ -132,7 +135,7 @@ export default function EditCardScreen({ navigation, route }: Props) {
         onCancel={() => setConfirmDelete(false)}
         onConfirm={handleDelete}
       />
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 

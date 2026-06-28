@@ -45,7 +45,7 @@ export default function SplitButton<T extends string | number>({
         <TouchableOpacity disabled={dis} onPress={onPlay} style={styles.main} activeOpacity={0.85}>
           <Icon name="play" size={20} color="#fff" />
           <Text style={{ color: '#fff', fontFamily: t.font(700), fontSize: 17 }}>
-            {count === 'all' ? `全部(${playable}問)を解く` : `${playable}問を解く`}
+            {count === 'all' ? `全問(${playable}問)を解く` : `${playable}問を解く`}
           </Text>
         </TouchableOpacity>
         <View style={[styles.divider, { backgroundColor: hexA('#ffffff', 0.35) }]} />

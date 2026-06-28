@@ -85,7 +85,7 @@ export default function FolderScreen({ navigation, route }: Props) {
     { value: 20, label: '20問' },
   ]
     .filter((o) => list.length > o.value)
-    .concat([{ value: 'all', label: '全部' }]);
+    .concat([{ value: 'all', label: '全問' }]);
 
   // 選択中のcountが非表示になったらリセット
   useEffect(() => {

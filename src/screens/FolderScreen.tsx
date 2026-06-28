@@ -1,6 +1,6 @@
 import { RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   Alert,
   ScrollView,
@@ -15,27 +15,17 @@ import EmptyState from '../components/EmptyState';
 import AudioButton from '../components/ui/AudioButton';
 import Chip from '../components/ui/Chip';
 import ConfirmDialog from '../components/ui/ConfirmDialog';
-import Field from '../components/ui/Field';
 import Header from '../components/ui/Header';
 import IconButton from '../components/ui/IconButton';
 import MasteryBar from '../components/ui/MasteryBar';
 import Segmented from '../components/ui/Segmented';
-import Sheet from '../components/ui/Sheet';
 import SplitButton from '../components/ui/SplitButton';
 import WordRow from '../components/ui/WordRow';
-import {
-  bulkCreateWords,
-  bulkDeleteWords,
-  bulkUpdateWordLevel,
-  createWord,
-  getWords,
-  updateWord,
-} from '../db/database';
+import { bulkCreateWords, bulkDeleteWords, bulkUpdateWordLevel, getWords } from '../db/database';
 import { hexA } from '../theme/theme';
 import { useTheme } from '../theme/ThemeContext';
 import { ALL_LEVELS, LEVEL_COLORS, LEVEL_LABELS, MemoryLevel, RootStackParamList, TOP_LEVEL, Word } from '../types';
 import { pickAndParseCSV } from '../utils/csv';
-import { speakText } from '../utils/tts';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Folder'>;
@@ -66,7 +56,6 @@ export default function FolderScreen({ navigation, route }: Props) {
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [confirm, setConfirm] = useState<{ ids: number[]; label: string } | null>(null);
-  const [editing, setEditing] = useState<{ visible: boolean; word: Word | null }>({ visible: false, word: null });
 
   const reload = useCallback(() => setWords(getWords(deckId)), [deckId]);
   useFocusEffect(reload);
@@ -103,7 +92,6 @@ export default function FolderScreen({ navigation, route }: Props) {
       next.has(id) ? next.delete(id) : next.add(id);
       return next;
     });
-  const selectedCards = list.filter((w) => selected.has(w.id));
 
   const handleBulkPerfect = () => {
     bulkUpdateWordLevel([...selected], TOP_LEVEL);
@@ -136,20 +124,6 @@ export default function FolderScreen({ navigation, route }: Props) {
     }
   };
 
-  const saveCard = (data: { id?: number; question: string; answer: string; reading: string; lang: string; level: MemoryLevel }) => {
-    if (data.id) {
-      updateWord(data.id, data.question, data.answer, data.reading, data.lang, data.level);
-    } else {
-      createWord(deckId, data.question, data.answer, data.reading, data.lang, data.level);
-    }
-    setEditing({ visible: false, word: null });
-    reload();
-  };
-  const deleteCard = (word: Word) => {
-    setEditing({ visible: false, word: null });
-    setConfirm({ ids: [word.id], label: `「${word.question}」を削除しますか？` });
-  };
-
   return (
     <View style={[styles.container, { backgroundColor: t.bg }]}>
       <Header
@@ -173,7 +147,14 @@ export default function FolderScreen({ navigation, route }: Props) {
               <TouchableOpacity onPress={handleCSVImport} style={[styles.csvBtn, { borderColor: t.hairStrong }]}>
                 <Text style={{ color: t.sub, fontFamily: t.font(700), fontSize: 12.5 }}>CSV</Text>
               </TouchableOpacity>
-              <IconButton name="plus" label="問題を追加" onPress={() => setEditing({ visible: true, word: null })} color={t.accentInk} bg={t.accentSoft} strokeWidth={2.2} />
+              <IconButton
+                name="plus"
+                label="問題を追加"
+                onPress={() => navigation.navigate('EditCard', { deckId, deckName })}
+                color={t.accentInk}
+                bg={t.accentSoft}
+                strokeWidth={2.2}
+              />
               <IconButton name="pencil" label="複数選択" onPress={() => setSelectMode(true)} color={t.accentInk} bg={t.accentSoft} strokeWidth={2.2} />
             </View>
           )
@@ -251,7 +232,7 @@ export default function FolderScreen({ navigation, route }: Props) {
                 selectMode={selectMode}
                 selected={selected.has(item.id)}
                 onToggleSelect={() => toggleSelect(item.id)}
-                onPress={() => setEditing({ visible: true, word: item })}
+                onPress={() => navigation.navigate('EditCard', { deckId, deckName, word: item })}
                 onSwipeDelete={() => handleSwipeDelete(item)}
               />
             ))}
@@ -297,122 +278,7 @@ export default function FolderScreen({ navigation, route }: Props) {
         onCancel={() => setConfirm(null)}
         onConfirm={confirmDelete}
       />
-
-      <EditCardSheet
-        visible={editing.visible}
-        word={editing.word}
-        onClose={() => setEditing({ visible: false, word: null })}
-        onSave={saveCard}
-        onDelete={deleteCard}
-      />
     </View>
-  );
-}
-
-function EditCardSheet({
-  visible,
-  word,
-  onClose,
-  onSave,
-  onDelete,
-}: {
-  visible: boolean;
-  word: Word | null;
-  onClose: () => void;
-  onSave: (data: { id?: number; question: string; answer: string; reading: string; lang: string; level: MemoryLevel }) => void;
-  onDelete: (word: Word) => void;
-}) {
-  const t = useTheme();
-  const [question, setQuestion] = useState('');
-  const [answer, setAnswer] = useState('');
-  const [reading, setReading] = useState('');
-  const [lang, setLang] = useState<'ja-JP' | 'en-US'>('ja-JP');
-  const [level, setLevel] = useState<MemoryLevel>(0);
-  const [previewSpeaking, setPreviewSpeaking] = useState(false);
-
-  useEffect(() => {
-    if (visible) {
-      setQuestion(word?.question ?? '');
-      setAnswer(word?.answer ?? '');
-      setReading(word?.reading ?? '');
-      setLang((word?.lang as 'ja-JP' | 'en-US') ?? 'ja-JP');
-      setLevel(word?.level ?? 0);
-    }
-  }, [visible, word]);
-
-  const valid = question.trim().length > 0 && answer.trim().length > 0;
-  const save = () => {
-    if (!valid) return;
-    onSave({ id: word?.id, question: question.trim(), answer: answer.trim(), reading: reading.trim(), lang, level });
-  };
-
-  const handlePreview = async () => {
-    const text = (reading.trim() || question.trim());
-    if (!text || previewSpeaking) return;
-    setPreviewSpeaking(true);
-    await speakText(text, 1.0);
-    setPreviewSpeaking(false);
-  };
-
-  return (
-    <Sheet
-      visible={visible}
-      onClose={onClose}
-      title={word ? '問題を編集' : '問題を追加'}
-      trailing={
-        <TouchableOpacity onPress={save} disabled={!valid} hitSlop={8}>
-          <Text style={{ color: valid ? t.accentInk : t.faint, fontFamily: t.font(700), fontSize: 16 }}>保存</Text>
-        </TouchableOpacity>
-      }
-    >
-      <Field label="表(問題)" value={question} onChangeText={setQuestion} placeholder="例：abandon" multiline autoFocus />
-      <Field label="裏(答え)" value={answer} onChangeText={setAnswer} placeholder="例：〜を捨てる、放棄する" multiline />
-      <View style={styles.readingRow}>
-        <View style={{ flex: 1 }}>
-          <Field label="音声の読み(任意)" value={reading} onChangeText={setReading} placeholder="未入力なら表を読み上げます" />
-        </View>
-        {(reading.trim() || question.trim()) && (
-          <AudioButton size={40} speaking={previewSpeaking} onPress={handlePreview} />
-        )}
-      </View>
-
-      <Text style={[styles.label, { color: t.sub, fontFamily: t.font(700), marginTop: 6 }]}>音声の言語</Text>
-      <View style={{ marginBottom: 18 }}>
-        <Segmented
-          value={lang}
-          onChange={setLang}
-          options={[
-            { value: 'ja-JP', label: '日本語' },
-            { value: 'en-US', label: '英語' },
-          ]}
-        />
-      </View>
-
-      <Text style={[styles.label, { color: t.sub, fontFamily: t.font(700) }]}>習熟度タグ</Text>
-      <View style={styles.tagRow}>
-        {ALL_LEVELS.map((lv) => {
-          const on = level === lv;
-          return (
-            <TouchableOpacity
-              key={lv}
-              onPress={() => setLevel(lv)}
-              style={[styles.tagPick, { backgroundColor: on ? LEVEL_COLORS[lv] : hexA(LEVEL_COLORS[lv], t.dark ? 0.16 : 0.1) }]}
-            >
-              <Text style={{ color: on ? '#fff' : LEVEL_COLORS[lv], fontFamily: t.font(700), fontSize: 14.5 }}>
-                {LEVEL_LABELS[lv]}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-
-      {word && (
-        <TouchableOpacity onPress={() => onDelete(word)} style={[styles.deleteBtn, { backgroundColor: hexA(DANGER, t.dark ? 0.18 : 0.1) }]}>
-          <Icon name="trash" size={19} color={DANGER} />
-          <Text style={{ color: DANGER, fontFamily: t.font(700), fontSize: 16 }}>この問題を削除</Text>
-        </TouchableOpacity>
-      )}
-    </Sheet>
   );
 }
 
@@ -420,7 +286,6 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   headerActions: { flexDirection: 'row', gap: 8, alignItems: 'center' },
   csvBtn: { borderWidth: 1, borderRadius: 16, paddingHorizontal: 10, height: 40, justifyContent: 'center', alignItems: 'center' },
-  readingRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   listContent: { paddingHorizontal: 18, paddingBottom: 40 },
   identity: { paddingHorizontal: 2, paddingBottom: 18 },
   deckName: { fontSize: 22, letterSpacing: 0.3 },
@@ -435,7 +300,4 @@ const styles = StyleSheet.create({
   hint: { fontSize: 12, textAlign: 'center', marginTop: 14 },
   bulkBar: { flexDirection: 'row', gap: 10, padding: 14, paddingBottom: 28, borderTopWidth: 0.5 },
   bulkBtn: { flex: 1, height: 50, borderRadius: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7 },
-  tagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 22 },
-  tagPick: { height: 40, paddingHorizontal: 16, borderRadius: 999, alignItems: 'center', justifyContent: 'center' },
-  deleteBtn: { height: 50, borderRadius: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
 });

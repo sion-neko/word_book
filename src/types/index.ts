@@ -27,6 +27,7 @@ export interface WeakWord extends Word {
 export type RootStackParamList = {
   Home: undefined;
   Folder: { deckId: number; deckName: string };
+  EditCard: { deckId: number; deckName: string; word?: Word };
   Study: { words: Word[]; title: string };
   AudioMode: { words: Word[]; title: string };
   Settings: undefined;

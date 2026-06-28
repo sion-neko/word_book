@@ -2,6 +2,7 @@ import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 import AudioModeScreen from '../screens/AudioModeScreen';
+import EditCardScreen from '../screens/EditCardScreen';
 import FolderScreen from '../screens/FolderScreen';
 import HomeScreen from '../screens/HomeScreen';
 import SettingsScreen from '../screens/SettingsScreen';
@@ -22,6 +23,7 @@ export default function Navigation() {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Folder" component={FolderScreen} />
+        <Stack.Screen name="EditCard" component={EditCardScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="Study" component={StudyScreen} options={{ presentation: 'modal' }} />
         <Stack.Screen name="AudioMode" component={AudioModeScreen} options={{ presentation: 'modal' }} />

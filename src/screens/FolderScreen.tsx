@@ -1,6 +1,6 @@
 import { RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   Alert,
   ScrollView,
@@ -32,7 +32,7 @@ type Props = {
   route: RouteProp<RootStackParamList, 'Folder'>;
 };
 
-type CountOption = 5 | 10 | 20 | 'all';
+type CountOption = 5 | 10 | 15 | 20 | 'all';
 
 const DANGER = LEVEL_COLORS[0];
 
@@ -77,6 +77,20 @@ export default function FolderScreen({ navigation, route }: Props) {
   const scope = scopes.find((s) => s.key === scopeKey) ?? scopes[0];
   const list = words.filter((w) => scope.test(w.level));
   const num = (w: Word) => words.findIndex((x) => x.id === w.id) + 1;
+
+  const countOptions: { value: CountOption; label: string }[] = [
+    { value: 5, label: '5問' },
+    { value: 10, label: '10問' },
+    { value: 15, label: '15問' },
+    { value: 20, label: '20問' },
+  ]
+    .filter((o) => list.length > o.value)
+    .concat([{ value: 'all', label: '全部' }]);
+
+  // 選択中のcountが非表示になったらリセット
+  useEffect(() => {
+    if (count !== 'all' && list.length <= count) setCount('all');
+  }, [list.length]);
 
   const playable = count === 'all' ? list.length : Math.min(count, list.length);
   const pick = (): Word[] => {
@@ -192,12 +206,7 @@ export default function FolderScreen({ navigation, route }: Props) {
                   playable={playable}
                   disabled={playable === 0}
                   onPlay={() => navigation.navigate('Study', { words: pick(), title: deckName })}
-                  options={[
-                    { value: 5, label: '5問' },
-                    { value: 10, label: '10問' },
-                    { value: 20, label: '20問' },
-                    { value: 'all', label: '全部' },
-                  ]}
+                  options={countOptions}
                 />
               </View>
               <TouchableOpacity

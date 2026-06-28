@@ -115,13 +115,35 @@ $xmlOut = "C:\Users\sionf\AppData\Local\Temp\claude\ui.xml"  # 適宜変更
 & $adb -s emulator-5554 pull /data/local/tmp/ui.xml $xmlOut
 ```
 
-XMLを `Read` ツールで読み、目的要素の `bounds="[left,top][right,bottom]"` を探す:
+**XML の解析は必ず Bash ツールの Python で行う。** `grep` や PowerShell の `Select-String` は日本語を文字化けさせるため使用禁止。
 
+```bash
+python3 -c "
+import xml.etree.ElementTree as ET
+tree = ET.parse('C:/Users/sionf/AppData/Local/Temp/claude/ui.xml')
+root = tree.getroot()
+# フルスクリーンのノイズを除外して有意な要素だけ表示
+SKIP = {'[0,0][1080,2400]', '[0,0][1080,200]', '[0,200][1080,2400]'}
+for el in root.iter():
+    text  = el.get('text', '')
+    desc  = el.get('content-desc', '')
+    bounds = el.get('bounds', '')
+    if bounds and bounds not in SKIP:
+        print(f'{text!r:30} {desc!r:30} {bounds}')
+"
+```
+
+出力例:
+```
+'保存'                          ''                             [938,89][1043,194]
+''                             '問題を追加'                      [813,89][918,194]
+```
+
+目的の要素の `bounds="[left,top][right,bottom]"` からタップ座標を計算:
 ```
 中心X = (left + right) / 2
 中心Y = (top + bottom) / 2
 ```
-
 例: `bounds="[938,89][1043,194]"` → タップ座標は `(990, 141)`
 
 ## STEP 6: タップ・テキスト入力・その他の操作
@@ -167,3 +189,6 @@ $adb = "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe"
 | Expo GoのLogin画面が出た | STEP7の手順でam startで直接URLを開く |
 | スクリーンショットが壊れる | `exec-out \| Set-Content` は使わず、`screencap -p /sdcard/X.png` + `pull` の2段階にする |
 | uiautomator dumpでエラー | `/data/local/tmp/ui.xml` を使う（`/sdcard/` だとBashがパスを誤解釈する） |
+| XML解析で日本語が文字化け | `grep` / `Select-String` は禁止。STEP5の Python スクリプトを使う |
+| ソフトキーボードが表示されない | エミュレーターはハードウェアキーボードがあるとデフォルトでソフトキーボードを出さない。`& $adb -s emulator-5554 shell settings put secure show_ime_with_hard_keyboard 1` を実行してから入力フィールドをタップする |
+| 特定の画面が開けない | STEP5でトップ画面から遷移先ボタンのboundsを取得し、STEP6のtapで順番に画面遷移する |

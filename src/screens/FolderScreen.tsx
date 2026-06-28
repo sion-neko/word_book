@@ -124,37 +124,30 @@ export default function FolderScreen({ navigation, route }: Props) {
   return (
     <View style={[styles.container, { backgroundColor: t.bg }]}>
       <Header
-        title={selectMode ? (selected.size ? `${selected.size}問を選択中` : '問題を選択') : deckName}
-        onBack={selectMode ? exitSelect : navigation.goBack}
-        backLabel={selectMode ? 'キャンセル' : undefined}
+        title={deckName}
+        onBack={navigation.goBack}
         trailing={
-          selectMode ? (
-            <TouchableOpacity
-              onPress={() =>
-                selected.size === list.length ? setSelected(new Set()) : setSelected(new Set(list.map((w) => w.id)))
-              }
-              hitSlop={8}
-            >
-              <Text style={{ color: t.accentInk, fontFamily: t.font(700), fontSize: 15 }}>
-                {selected.size === list.length && list.length ? '全解除' : 'すべて選択'}
-              </Text>
+          <View style={styles.headerActions}>
+            <TouchableOpacity onPress={handleCSVImport} style={[styles.csvBtn, { borderColor: t.hairStrong }]}>
+              <Text style={{ color: t.sub, fontFamily: t.font(700), fontSize: 12.5 }}>CSV</Text>
             </TouchableOpacity>
-          ) : (
-            <View style={styles.headerActions}>
-              <TouchableOpacity onPress={handleCSVImport} style={[styles.csvBtn, { borderColor: t.hairStrong }]}>
-                <Text style={{ color: t.sub, fontFamily: t.font(700), fontSize: 12.5 }}>CSV</Text>
-              </TouchableOpacity>
-              <IconButton
-                name="plus"
-                label="問題を追加"
-                onPress={() => navigation.navigate('EditCard', { deckId, deckName })}
-                color={t.accentInk}
-                bg={t.accentSoft}
-                strokeWidth={2.2}
-              />
-              <IconButton name="pencil" label="複数選択" onPress={() => setSelectMode(true)} color={t.accentInk} bg={t.accentSoft} strokeWidth={2.2} />
-            </View>
-          )
+            <IconButton
+              name="plus"
+              label="問題を追加"
+              onPress={() => navigation.navigate('EditCard', { deckId, deckName })}
+              color={t.accentInk}
+              bg={t.accentSoft}
+              strokeWidth={2.2}
+            />
+            <IconButton
+              name="pencil"
+              label="複数選択"
+              onPress={() => (selectMode ? exitSelect() : setSelectMode(true))}
+              color={selectMode ? t.bg : t.accentInk}
+              bg={selectMode ? t.accentInk : t.accentSoft}
+              strokeWidth={2.2}
+            />
+          </View>
         }
       />
 

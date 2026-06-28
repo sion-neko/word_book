@@ -183,24 +183,17 @@ export default function FolderScreen({ navigation, route }: Props) {
               style={[
                 styles.scopeBtn,
                 {
-                  borderColor: selectedLevels.size > 0 ? t.accent : t.hairStrong,
-                  backgroundColor: selectedLevels.size > 0 ? t.accentSoft : t.surface,
+                  borderColor: selectedLevels.size > 0 || shuffle ? t.accent : t.hairStrong,
+                  backgroundColor: selectedLevels.size > 0 || shuffle ? t.accentSoft : t.surface,
                 },
               ]}
             >
-              <Text style={{ color: selectedLevels.size > 0 ? t.accentInk : t.ink, fontFamily: t.font(600), fontSize: 13.5 }}>
+              <Text style={{ color: selectedLevels.size > 0 || shuffle ? t.accentInk : t.ink, fontFamily: t.font(600), fontSize: 13.5 }}>
                 {scopeLabel}
               </Text>
-              <Icon name="chevron" size={14} color={selectedLevels.size > 0 ? t.accentInk : t.sub} strokeWidth={2.2} />
+              {shuffle && <Icon name="shuffle" size={13} color={t.accentInk} strokeWidth={2.2} />}
+              <Icon name="chevron" size={14} color={selectedLevels.size > 0 || shuffle ? t.accentInk : t.sub} strokeWidth={2.2} />
             </TouchableOpacity>
-
-            <View style={styles.shuffleRow}>
-              <View style={styles.shuffleLabel}>
-                <Icon name="shuffle" size={15} color={shuffle ? t.accentInk : t.sub} strokeWidth={2} />
-                <Text style={{ color: t.ink, fontFamily: t.font(700), fontSize: 13.5 }}>シャッフル</Text>
-              </View>
-              <Switch value={shuffle} onValueChange={setShuffle} trackColor={{ true: t.accent }} />
-            </View>
 
             <View style={styles.playRow}>
               <View style={{ flex: 1 }}>
@@ -302,6 +295,14 @@ export default function FolderScreen({ navigation, route }: Props) {
             </TouchableOpacity>
           );
         })}
+        <View style={[styles.scopeDivider, { backgroundColor: t.hair }]} />
+        <View style={styles.scopeOption}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <Icon name="shuffle" size={16} color={shuffle ? t.accentInk : t.sub} strokeWidth={2} />
+            <Text style={{ color: t.ink, fontFamily: t.font(600), fontSize: 15 }}>シャッフル</Text>
+          </View>
+          <Switch value={shuffle} onValueChange={setShuffle} trackColor={{ true: t.accent }} />
+        </View>
       </Sheet>
 
       <ConfirmDialog
@@ -327,8 +328,6 @@ const styles = StyleSheet.create({
   scopeOption: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', height: 44, paddingHorizontal: 14, borderRadius: 10, marginBottom: 2 },
   scopeDivider: { height: 0.5, marginVertical: 6, marginHorizontal: 14 },
   levelDot: { width: 10, height: 10, borderRadius: 999 },
-  shuffleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginHorizontal: 2, marginBottom: 14 },
-  shuffleLabel: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   playRow: { flexDirection: 'row', gap: 10, marginBottom: 26 },
   squareBtn: { width: 54, height: 54, borderRadius: 14, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
   listCard: { borderRadius: 20, paddingHorizontal: 16, paddingVertical: 4, overflow: 'hidden' },

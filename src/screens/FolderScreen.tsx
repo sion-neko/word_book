@@ -101,9 +101,6 @@ export default function FolderScreen({ navigation, route }: Props) {
   const handleBulkDelete = () => {
     setConfirm({ ids: [...selected], label: `${selected.size}問を削除しますか？` });
   };
-  const handleSwipeDelete = (word: Word) => {
-    setConfirm({ ids: [word.id], label: `「${word.question}」を削除しますか？` });
-  };
   const confirmDelete = () => {
     if (!confirm) return;
     bulkDeleteWords(confirm.ids);
@@ -233,7 +230,6 @@ export default function FolderScreen({ navigation, route }: Props) {
                 selected={selected.has(item.id)}
                 onToggleSelect={() => toggleSelect(item.id)}
                 onPress={() => navigation.navigate('EditCard', { deckId, deckName, word: item })}
-                onSwipeDelete={() => handleSwipeDelete(item)}
               />
             ))}
           </View>
@@ -244,7 +240,7 @@ export default function FolderScreen({ navigation, route }: Props) {
         )}
 
         {!selectMode && list.length > 0 && (
-          <Text style={[styles.hint, { color: t.faint }]}>タップで編集 ・ 左スワイプで削除</Text>
+          <Text style={[styles.hint, { color: t.faint }]}>タップで編集</Text>
         )}
       </ScrollView>
 

@@ -12,13 +12,11 @@ import {
 } from 'react-native';
 import Icon from '../components/Icon';
 import EmptyState from '../components/EmptyState';
-import AudioButton from '../components/ui/AudioButton';
-import Chip from '../components/ui/Chip';
 import ConfirmDialog from '../components/ui/ConfirmDialog';
 import Header from '../components/ui/Header';
 import IconButton from '../components/ui/IconButton';
 import MasteryBar from '../components/ui/MasteryBar';
-import Segmented from '../components/ui/Segmented';
+import Sheet from '../components/ui/Sheet';
 import SplitButton from '../components/ui/SplitButton';
 import WordRow from '../components/ui/WordRow';
 import { bulkCreateWords, bulkDeleteWords, bulkUpdateWordLevel, getWords } from '../db/database';
@@ -50,7 +48,8 @@ export default function FolderScreen({ navigation, route }: Props) {
   const t = useTheme();
 
   const [words, setWords] = useState<Word[]>([]);
-  const [scopeKey, setScopeKey] = useState('all');
+  const [selectedLevels, setSelectedLevels] = useState<Set<MemoryLevel>>(new Set());
+  const [scopeSheet, setScopeSheet] = useState(false);
   const [shuffle, setShuffle] = useState(false);
   const [count, setCount] = useState<CountOption>('all');
   const [selectMode, setSelectMode] = useState(false);
@@ -65,18 +64,20 @@ export default function FolderScreen({ navigation, route }: Props) {
     setSelected(new Set());
   };
 
-  const scopes: { key: string; label: string; color?: string; test: (level: MemoryLevel) => boolean }[] = [
-    { key: 'all', label: 'すべて', test: () => true },
-    ...ALL_LEVELS.slice(0, -1).map((lv) => ({
-      key: `le${lv}`,
-      label: `${LEVEL_LABELS[lv]}以下`,
-      color: LEVEL_COLORS[lv],
-      test: (level: MemoryLevel) => level <= lv,
-    })),
-  ];
-  const scope = scopes.find((s) => s.key === scopeKey) ?? scopes[0];
-  const list = words.filter((w) => scope.test(w.level));
+  const list = words.filter((w) => selectedLevels.size === 0 || selectedLevels.has(w.level));
   const num = (w: Word) => words.findIndex((x) => x.id === w.id) + 1;
+
+  const toggleLevel = (lv: MemoryLevel) =>
+    setSelectedLevels((prev) => {
+      const next = new Set(prev);
+      next.has(lv) ? next.delete(lv) : next.add(lv);
+      return next;
+    });
+
+  const scopeLabel =
+    selectedLevels.size === 0
+      ? 'すべて'
+      : [...selectedLevels].sort((a, b) => a - b).map((lv) => LEVEL_LABELS[lv]).join('・');
 
   const countOptions: { value: CountOption; label: string }[] = [
     { value: 5, label: '5問' },
@@ -177,18 +178,21 @@ export default function FolderScreen({ navigation, route }: Props) {
         {!selectMode && (
           <>
             <Text style={[styles.label, { color: t.sub, fontFamily: t.font(700) }]}>出題する範囲</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scopeScroll} contentContainerStyle={styles.scopeContent}>
-              {scopes.map((s) => (
-                <Chip
-                  key={s.key}
-                  label={s.label}
-                  color={s.color}
-                  active={scopeKey === s.key}
-                  onPress={() => setScopeKey(s.key)}
-                  count={words.filter((w) => s.test(w.level)).length}
-                />
-              ))}
-            </ScrollView>
+            <TouchableOpacity
+              onPress={() => setScopeSheet(true)}
+              style={[
+                styles.scopeBtn,
+                {
+                  borderColor: selectedLevels.size > 0 ? t.accent : t.hairStrong,
+                  backgroundColor: selectedLevels.size > 0 ? t.accentSoft : t.surface,
+                },
+              ]}
+            >
+              <Text style={{ color: selectedLevels.size > 0 ? t.accentInk : t.ink, fontFamily: t.font(600), fontSize: 13.5 }}>
+                {scopeLabel}
+              </Text>
+              <Icon name="chevron" size={14} color={selectedLevels.size > 0 ? t.accentInk : t.sub} strokeWidth={2.2} />
+            </TouchableOpacity>
 
             <View style={styles.shuffleRow}>
               <View style={styles.shuffleLabel}>
@@ -269,6 +273,37 @@ export default function FolderScreen({ navigation, route }: Props) {
         </View>
       )}
 
+      <Sheet visible={scopeSheet} onClose={() => setScopeSheet(false)} title="出題する範囲">
+        <TouchableOpacity
+          onPress={() => setSelectedLevels(new Set())}
+          style={[styles.scopeOption, { backgroundColor: selectedLevels.size === 0 ? t.accentSoft : 'transparent' }]}
+        >
+          <Text style={{ color: selectedLevels.size === 0 ? t.accentInk : t.ink, fontFamily: t.font(selectedLevels.size === 0 ? 700 : 600), fontSize: 15 }}>
+            すべて
+          </Text>
+          {selectedLevels.size === 0 && <Icon name="check" size={16} color={t.accentInk} strokeWidth={2.6} />}
+        </TouchableOpacity>
+        <View style={[styles.scopeDivider, { backgroundColor: t.hair }]} />
+        {ALL_LEVELS.map((lv) => {
+          const on = selectedLevels.has(lv);
+          return (
+            <TouchableOpacity
+              key={lv}
+              onPress={() => toggleLevel(lv)}
+              style={[styles.scopeOption, { backgroundColor: on ? hexA(LEVEL_COLORS[lv], t.dark ? 0.18 : 0.1) : 'transparent' }]}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <View style={[styles.levelDot, { backgroundColor: LEVEL_COLORS[lv] }]} />
+                <Text style={{ color: on ? LEVEL_COLORS[lv] : t.ink, fontFamily: t.font(on ? 700 : 600), fontSize: 15 }}>
+                  {LEVEL_LABELS[lv]}
+                </Text>
+              </View>
+              {on && <Icon name="check" size={16} color={LEVEL_COLORS[lv]} strokeWidth={2.6} />}
+            </TouchableOpacity>
+          );
+        })}
+      </Sheet>
+
       <ConfirmDialog
         visible={confirm !== null}
         label={confirm?.label ?? ''}
@@ -288,8 +323,10 @@ const styles = StyleSheet.create({
   identity: { paddingHorizontal: 2, paddingBottom: 18 },
   deckName: { fontSize: 22, letterSpacing: 0.3 },
   label: { fontSize: 12.5, letterSpacing: 0.4, marginHorizontal: 2, marginBottom: 10 },
-  scopeScroll: { marginHorizontal: -18 },
-  scopeContent: { paddingHorizontal: 18, gap: 8, paddingBottom: 16 },
+  scopeBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', borderWidth: 1, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8, marginBottom: 16 },
+  scopeOption: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', height: 44, paddingHorizontal: 14, borderRadius: 10, marginBottom: 2 },
+  scopeDivider: { height: 0.5, marginVertical: 6, marginHorizontal: 14 },
+  levelDot: { width: 10, height: 10, borderRadius: 999 },
   shuffleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginHorizontal: 2, marginBottom: 14 },
   shuffleLabel: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   playRow: { flexDirection: 'row', gap: 10, marginBottom: 26 },

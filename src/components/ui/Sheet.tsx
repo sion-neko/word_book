@@ -35,7 +35,7 @@ export default function Sheet({ visible, onClose, title, trailing, children }: P
 
     const showSub = Keyboard.addListener(showEvent, (e) => {
       Animated.timing(translateY, {
-        toValue: -(e.endCoordinates.height / 2),
+        toValue: -(e.endCoordinates.height / 4),
         duration: 180,
         useNativeDriver: true,
       }).start();

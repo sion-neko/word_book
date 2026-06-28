@@ -15,7 +15,6 @@ import EmptyState from '../components/EmptyState';
 import ConfirmDialog from '../components/ui/ConfirmDialog';
 import Header from '../components/ui/Header';
 import IconButton from '../components/ui/IconButton';
-import MasteryBar from '../components/ui/MasteryBar';
 import Sheet from '../components/ui/Sheet';
 import SplitButton from '../components/ui/SplitButton';
 import WordRow from '../components/ui/WordRow';
@@ -167,9 +166,6 @@ export default function FolderScreen({ navigation, route }: Props) {
       />
 
       <ScrollView contentContainerStyle={styles.listContent}>
-        <View style={styles.identity}>
-          <MasteryBar words={words} />
-        </View>
 
         {!selectMode && (
           <>
@@ -317,8 +313,6 @@ const styles = StyleSheet.create({
   headerActions: { flexDirection: 'row', gap: 8, alignItems: 'center' },
   csvBtn: { borderWidth: 1, borderRadius: 16, paddingHorizontal: 10, height: 40, justifyContent: 'center', alignItems: 'center' },
   listContent: { paddingHorizontal: 18, paddingBottom: 40 },
-  identity: { paddingHorizontal: 2, paddingBottom: 18 },
-  deckName: { fontSize: 22, letterSpacing: 0.3 },
   label: { fontSize: 12.5, letterSpacing: 0.4, marginHorizontal: 2, marginBottom: 10 },
   scopeBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', borderWidth: 1, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8, marginBottom: 16 },
   scopeOption: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', height: 44, paddingHorizontal: 14, borderRadius: 10, marginBottom: 2 },

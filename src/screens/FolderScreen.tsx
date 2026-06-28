@@ -139,7 +139,6 @@ export default function FolderScreen({ navigation, route }: Props) {
   return (
     <View style={[styles.container, { backgroundColor: t.bg }]}>
       <Header
-        title={deckName}
         onBack={navigation.goBack}
         trailing={
           <View style={styles.headerActions}>

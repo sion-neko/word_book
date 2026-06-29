@@ -28,6 +28,12 @@ export default function StudyScreen({ navigation, route }: Props) {
   const [idx, setIdx] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [done, setDone] = useState(false);
+  const [initialCounts, setInitialCounts] = useState<Record<MemoryLevel, number>>(() =>
+    ALL_LEVELS.reduce((acc, lv) => {
+      acc[lv] = route.params.words.filter((w) => w.level === lv).length;
+      return acc;
+    }, {} as Record<MemoryLevel, number>)
+  );
 
   const pan = useRef(new Animated.ValueXY()).current;
   const isSwipingRef = useRef(false);
@@ -123,6 +129,12 @@ export default function StudyScreen({ navigation, route }: Props) {
   });
 
   const restart = (subset: Word[]) => {
+    setInitialCounts(
+      ALL_LEVELS.reduce((acc, lv) => {
+        acc[lv] = subset.filter((w) => w.level === lv).length;
+        return acc;
+      }, {} as Record<MemoryLevel, number>)
+    );
     setCards(subset);
     setIdx(0);
     setDone(false);
@@ -133,38 +145,51 @@ export default function StudyScreen({ navigation, route }: Props) {
   if (done) {
     const weakCards = cards.filter((c) => isWeak(c.level));
     const weakCount = weakCards.length;
-    const goodCount = cards.length - weakCount;
-    const rate = cards.length ? Math.round((goodCount / cards.length) * 100) : 0;
-    const rateColor = rate >= 80 ? LEVEL_COLORS[4] : rate >= 50 ? LEVEL_COLORS[2] : LEVEL_COLORS[0];
+
+    const finalCounts = ALL_LEVELS.reduce((acc, lv) => {
+      acc[lv] = cards.filter((c) => c.level === lv).length;
+      return acc;
+    }, {} as Record<MemoryLevel, number>);
+
+    const getDeltaColor = (lv: MemoryLevel, delta: number): string => {
+      if (delta === 0 || lv < 3) return t.faint;
+      return delta > 0 ? LEVEL_COLORS[4] : LEVEL_COLORS[0];
+    };
 
     return (
       <View style={[styles.container, { backgroundColor: t.bg }]}>
         <View style={styles.resultWrap}>
-          <Text style={{ color: t.faint, fontFamily: t.mono(700), fontSize: 13, letterSpacing: 2 }}>習熟率</Text>
-          <Text style={{ color: rateColor, fontFamily: t.mono(700), fontSize: 68, marginTop: 4 }}>
-            {rate}
-            <Text style={{ fontSize: 30 }}>%</Text>
-          </Text>
-          <Text style={{ color: t.sub, fontFamily: t.mono(400), fontSize: 15, marginTop: 8 }}>
-            {cards.length}問中 {goodCount}問が覚えた以上
+          <Text style={{ color: t.faint, fontFamily: t.mono(700), fontSize: 12, letterSpacing: 2, marginBottom: 20 }}>
+            RESULT
           </Text>
 
-          <View style={styles.barWrap}>
-            <MasteryBar words={cards} />
-          </View>
-          <View style={styles.legend}>
-            {ALL_LEVELS.map((lv) => {
-              const n = cards.filter((c) => c.level === lv).length;
+          <View style={[styles.resultTable, t.shadowSoft, { backgroundColor: t.surface }]}>
+            {([4, 3, 2, 1, 0] as MemoryLevel[]).map((lv, i) => {
+              const before = initialCounts[lv] ?? 0;
+              const after = finalCounts[lv] ?? 0;
+              const delta = after - before;
+              const color = getDeltaColor(lv, delta);
+              const deltaStr = delta > 0 ? `+${delta}` : delta < 0 ? `${delta}` : '±0';
+              const isLast = i === 4;
               return (
-                <View key={lv} style={styles.legendRow}>
-                  <View style={[styles.legendDot, { backgroundColor: LEVEL_COLORS[lv] }]} />
-                  <Text style={{ color: t.sub, fontFamily: t.font(600), fontSize: 13, flex: 1 }}>
+                <View key={lv} style={[styles.resultTableRow, !isLast && { borderBottomWidth: 0.5, borderBottomColor: t.hair }]}>
+                  <View style={[styles.levelDot, { backgroundColor: LEVEL_COLORS[lv] }]} />
+                  <Text style={{ color: t.sub, fontFamily: t.font(600), fontSize: 14, flex: 1 }}>
                     {LEVEL_LABELS[lv]}
                   </Text>
-                  <Text style={{ color: t.ink, fontFamily: t.mono(500), fontSize: 13 }}>{n}</Text>
+                  <Text style={{ color: color, fontFamily: t.mono(700), fontSize: 20, minWidth: 44, textAlign: 'right' }}>
+                    {deltaStr}
+                  </Text>
+                  <Text style={{ color: t.faint, fontFamily: t.mono(400), fontSize: 12, marginLeft: 8, minWidth: 64 }}>
+                    ({before}→{after})
+                  </Text>
                 </View>
               );
             })}
+          </View>
+
+          <View style={styles.barWrap}>
+            <MasteryBar words={cards} />
           </View>
 
           <View style={styles.resultActions}>
@@ -173,7 +198,7 @@ export default function StudyScreen({ navigation, route }: Props) {
                 {`苦手${weakCount}問を再挑戦`}
               </PrimaryButton>
             )}
-            <View style={styles.resultRow}>
+            <View style={styles.resultBtnRow}>
               <View style={{ flex: 1 }}>
                 <PrimaryButton full kind="ghost" onPress={() => restart(cards)}>
                   もう一度
@@ -289,10 +314,10 @@ const styles = StyleSheet.create({
   navRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 14 },
   navBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, padding: 6 },
   resultWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 30 },
-  barWrap: { width: '100%', maxWidth: 320, marginTop: 26 },
-  legend: { width: '100%', maxWidth: 320, marginTop: 14, gap: 6 },
-  legendRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  legendDot: { width: 8, height: 8, borderRadius: 999 },
-  resultActions: { width: '100%', maxWidth: 320, marginTop: 32, gap: 12 },
-  resultRow: { flexDirection: 'row', gap: 12 },
+  resultTable: { width: '100%', maxWidth: 320, borderRadius: 16, paddingHorizontal: 16, paddingVertical: 4 },
+  resultTableRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 12 },
+  levelDot: { width: 9, height: 9, borderRadius: 999 },
+  barWrap: { width: '100%', maxWidth: 320, marginTop: 20 },
+  resultActions: { width: '100%', maxWidth: 320, marginTop: 28, gap: 12 },
+  resultBtnRow: { flexDirection: 'row', gap: 12 },
 });

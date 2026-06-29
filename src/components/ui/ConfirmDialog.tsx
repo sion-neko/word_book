@@ -5,6 +5,7 @@ import { useTheme } from '../../theme/ThemeContext';
 interface Props {
   visible: boolean;
   label: string;
+  description?: string;
   confirmLabel?: string;
   confirmColor: string;
   onCancel: () => void;
@@ -14,6 +15,7 @@ interface Props {
 export default function ConfirmDialog({
   visible,
   label,
+  description,
   confirmLabel = '削除する',
   confirmColor,
   onCancel,
@@ -26,7 +28,7 @@ export default function ConfirmDialog({
         <Pressable style={[styles.card, t.shadow, { backgroundColor: t.surface }]} onPress={() => {}}>
           <Text style={[styles.label, { color: t.ink, fontFamily: t.font(700) }]}>{label}</Text>
           <Text style={{ color: t.sub, fontFamily: t.font(400), fontSize: 13, textAlign: 'center', marginTop: 6 }}>
-            この操作は取り消せません
+            {description ?? 'この操作は取り消せません'}
           </Text>
           <TouchableOpacity onPress={onConfirm} style={[styles.btn, { backgroundColor: confirmColor }]}>
             <Text style={{ color: '#fff', fontFamily: t.font(700), fontSize: 16 }}>{confirmLabel}</Text>

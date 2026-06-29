@@ -1,9 +1,10 @@
 import { RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, PanResponder, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Animated, BackHandler, PanResponder, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from '../components/Icon';
+import ConfirmDialog from '../components/ui/ConfirmDialog';
 import FlipCard from '../components/ui/FlipCard';
 import IconButton from '../components/ui/IconButton';
 import MasteryBar from '../components/ui/MasteryBar';
@@ -28,6 +29,7 @@ export default function StudyScreen({ navigation, route }: Props) {
   const [idx, setIdx] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [done, setDone] = useState(false);
+  const [showCloseConfirm, setShowCloseConfirm] = useState(false);
   const [initialCounts, setInitialCounts] = useState<Record<MemoryLevel, number>>(() =>
     ALL_LEVELS.reduce((acc, lv) => {
       acc[lv] = route.params.words.filter((w) => w.level === lv).length;
@@ -41,6 +43,7 @@ export default function StudyScreen({ navigation, route }: Props) {
   const onTapRef = useRef<() => void>(() => {});
 
   const close = () => navigation.goBack();
+  const requestClose = () => setShowCloseConfirm(true);
 
   const go = (d: number) => {
     setFlipped(false);
@@ -86,6 +89,15 @@ export default function StudyScreen({ navigation, route }: Props) {
   useEffect(() => {
     pan.setValue({ x: 0, y: 0 });
   }, [idx]);
+
+  useEffect(() => {
+    if (done) return;
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      setShowCloseConfirm(true);
+      return true;
+    });
+    return () => sub.remove();
+  }, [done]);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -222,7 +234,7 @@ export default function StudyScreen({ navigation, route }: Props) {
   return (
     <View style={[styles.container, { backgroundColor: t.bg }]}>
       <View style={[styles.topBar, { paddingTop: insets.top + 12 }]}>
-        <IconButton name="close" label="閉じる" onPress={close} strokeWidth={2.2} />
+        <IconButton name="close" label="閉じる" onPress={requestClose} strokeWidth={2.2} />
         <View style={[styles.progressTrack, { backgroundColor: t.hair }]}>
           <View
             style={[
@@ -285,6 +297,16 @@ export default function StudyScreen({ navigation, route }: Props) {
           </TouchableOpacity>
         </View>
       </View>
+
+      <ConfirmDialog
+        visible={showCloseConfirm}
+        label="学習を中断しますか？"
+        description={"途中からの再開はできません\nここまでのタグ付けは保存されます"}
+        confirmLabel="終了する"
+        confirmColor={t.accent}
+        onCancel={() => setShowCloseConfirm(false)}
+        onConfirm={close}
+      />
     </View>
   );
 }

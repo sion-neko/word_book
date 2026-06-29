@@ -68,7 +68,7 @@ export default function StudyScreen({ navigation, route }: Props) {
     if (isSwipingRef.current) return;
     isSwipingRef.current = true;
     const card = cards[idx];
-    const lvl: MemoryLevel = dir > 0 ? TOP_LEVEL : 0;
+    const lvl: MemoryLevel = dir > 0 ? TOP_LEVEL : 1;
     Animated.timing(pan, {
       toValue: { x: dir * SWIPE_OUT_X, y: 0 },
       duration: 220,
@@ -256,9 +256,9 @@ export default function StudyScreen({ navigation, route }: Props) {
           <FlipCard word={card} flipped={flipped} />
           <Animated.View
             pointerEvents="none"
-            style={[styles.swipeLabel, styles.swipeLabelLeft, { opacity: leftOpacity, borderColor: LEVEL_COLORS[0] }]}
+            style={[styles.swipeLabel, styles.swipeLabelLeft, { opacity: leftOpacity, borderColor: LEVEL_COLORS[1] }]}
           >
-            <Text style={[styles.swipeLabelText, { color: LEVEL_COLORS[0] }]}>苦手</Text>
+            <Text style={[styles.swipeLabelText, { color: LEVEL_COLORS[1] }]}>難しい</Text>
           </Animated.View>
           <Animated.View
             pointerEvents="none"
@@ -271,7 +271,7 @@ export default function StudyScreen({ navigation, route }: Props) {
 
       <View style={styles.bottomArea}>
         <Text style={[styles.swipeHint, { color: t.faint }]}>
-          ← スワイプで苦手 ・ 完璧でスワイプ → ／ タップで習熟度を選択
+          ← スワイプで難しい ・ 完璧でスワイプ → ／ タップで習熟度を選択
         </Text>
         <View style={styles.levelRow}>
           {ALL_LEVELS.map((lv) => (

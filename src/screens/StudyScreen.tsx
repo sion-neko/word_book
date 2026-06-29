@@ -207,7 +207,7 @@ export default function StudyScreen({ navigation, route }: Props) {
           <View style={styles.resultActions}>
             {weakCount > 0 && (
               <PrimaryButton full icon="arrow-right" onPress={() => restart(weakCards)}>
-                {`苦手${weakCount}問を再挑戦`}
+                {`難しい${weakCount}問を再挑戦`}
               </PrimaryButton>
             )}
             <View style={styles.resultBtnRow}>

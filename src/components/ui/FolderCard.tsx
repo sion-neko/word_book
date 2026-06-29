@@ -33,7 +33,7 @@ export default function FolderCard({ deck, words, onPress, onLongPress }: Props)
             {deck.name}
           </Text>
           <Text style={[styles.meta, { color: t.sub, fontFamily: t.mono(400) }]}>
-            {words.length}問{weak > 0 ? ` · 苦手 ${weak}` : ''}
+            {words.length}問{weak > 0 ? ` · 難しい ${weak}` : ''}
           </Text>
         </View>
         <Icon name="chevron" size={18} color={t.faint} strokeWidth={2} />

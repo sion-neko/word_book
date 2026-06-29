@@ -239,7 +239,7 @@ export default function StudyScreen({ navigation, route }: Props) {
           <View
             style={[
               styles.progressFill,
-              { width: `${((idx + 1) / cards.length) * 100}%`, backgroundColor: t.accent },
+              { width: `${(idx / cards.length) * 100}%`, backgroundColor: t.accent },
             ]}
           />
         </View>

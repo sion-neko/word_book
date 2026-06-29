@@ -244,7 +244,7 @@ export default function StudyScreen({ navigation, route }: Props) {
           />
         </View>
         <Text style={{ fontFamily: t.mono(400), color: t.sub, fontSize: 14, minWidth: 48, textAlign: 'right' }}>
-          {idx + 1}/{cards.length}
+          残り{cards.length - idx}問
         </Text>
       </View>
 

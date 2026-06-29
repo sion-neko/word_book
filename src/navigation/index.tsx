@@ -25,7 +25,7 @@ export default function Navigation() {
         <Stack.Screen name="Folder" component={FolderScreen} />
         <Stack.Screen name="EditCard" component={EditCardScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
-        <Stack.Screen name="Study" component={StudyScreen} />
+        <Stack.Screen name="Study" component={StudyScreen} options={{ animation: 'slide_from_bottom' }} />
         <Stack.Screen name="AudioMode" component={AudioModeScreen} options={{ presentation: 'modal' }} />
       </Stack.Navigator>
     </NavigationContainer>

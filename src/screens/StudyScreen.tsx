@@ -1,7 +1,7 @@
 import { RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useRef, useState } from 'react';
-import { PanResponder, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated, PanResponder, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from '../components/Icon';
 import FlipCard from '../components/ui/FlipCard';
@@ -18,7 +18,8 @@ type Props = {
   route: RouteProp<RootStackParamList, 'Study'>;
 };
 
-const SWIPE_THRESHOLD = 55;
+const SWIPE_THRESHOLD = 80;
+const SWIPE_OUT_X = 500;
 
 export default function StudyScreen({ navigation, route }: Props) {
   const t = useTheme();
@@ -27,6 +28,11 @@ export default function StudyScreen({ navigation, route }: Props) {
   const [idx, setIdx] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [done, setDone] = useState(false);
+
+  const pan = useRef(new Animated.ValueXY()).current;
+  const isSwipingRef = useRef(false);
+  const onSwipeRef = useRef<(dir: 1 | -1) => void>(() => {});
+  const onTapRef = useRef<() => void>(() => {});
 
   const close = () => navigation.goBack();
 
@@ -48,24 +54,80 @@ export default function StudyScreen({ navigation, route }: Props) {
     setTimeout(() => go(1), 180);
   };
 
+  // Updated every render to capture latest state
+  onSwipeRef.current = (dir: 1 | -1) => {
+    if (isSwipingRef.current) return;
+    isSwipingRef.current = true;
+    const card = cards[idx];
+    const lvl: MemoryLevel = dir > 0 ? TOP_LEVEL : 0;
+    Animated.timing(pan, {
+      toValue: { x: dir * SWIPE_OUT_X, y: 0 },
+      duration: 220,
+      useNativeDriver: false,
+    }).start(() => {
+      pan.setValue({ x: 0, y: 0 });
+      isSwipingRef.current = false;
+      if (card) {
+        updateWordLevel(card.id, lvl);
+        setCards((cs) => cs.map((c) => (c.id === card.id ? { ...c, level: lvl } : c)));
+      }
+      go(1);
+    });
+  };
+
+  onTapRef.current = () => setFlipped((f) => !f);
+
+  useEffect(() => {
+    pan.setValue({ x: 0, y: 0 });
+  }, [idx]);
+
   const panResponder = useRef(
     PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
+      onStartShouldSetPanResponder: () => !isSwipingRef.current,
+      onMoveShouldSetPanResponder: (_, g) =>
+        !isSwipingRef.current && (Math.abs(g.dx) > 3 || Math.abs(g.dy) > 3),
+      onPanResponderMove: Animated.event([null, { dx: pan.x, dy: pan.y }], { useNativeDriver: false }),
       onPanResponderRelease: (_, g) => {
+        if (isSwipingRef.current) return;
         if (Math.abs(g.dx) > SWIPE_THRESHOLD) {
-          tag(g.dx > 0 ? TOP_LEVEL : 0);
+          onSwipeRef.current(g.dx > 0 ? 1 : -1);
+        } else if (Math.abs(g.dx) < 8 && Math.abs(g.dy) < 8) {
+          Animated.spring(pan, { toValue: { x: 0, y: 0 }, useNativeDriver: false }).start();
+          onTapRef.current();
         } else {
-          setFlipped((f) => !f);
+          Animated.spring(pan, { toValue: { x: 0, y: 0 }, useNativeDriver: false }).start();
         }
+      },
+      onPanResponderTerminate: () => {
+        Animated.spring(pan, { toValue: { x: 0, y: 0 }, useNativeDriver: false }).start();
       },
     })
   ).current;
+
+  const rotate = pan.x.interpolate({
+    inputRange: [-200, 0, 200],
+    outputRange: ['-12deg', '0deg', '12deg'],
+    extrapolate: 'clamp',
+  });
+
+  const leftOpacity = pan.x.interpolate({
+    inputRange: [-100, 0],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+  const rightOpacity = pan.x.interpolate({
+    inputRange: [0, 100],
+    outputRange: [0, 1],
+    extrapolate: 'clamp',
+  });
 
   const restart = (subset: Word[]) => {
     setCards(subset);
     setIdx(0);
     setDone(false);
     setFlipped(false);
+    pan.setValue({ x: 0, y: 0 });
   };
 
   if (done) {
@@ -149,8 +211,25 @@ export default function StudyScreen({ navigation, route }: Props) {
         </Text>
       </View>
 
-      <View {...panResponder.panHandlers} style={styles.cardArea}>
-        <FlipCard word={card} flipped={flipped} />
+      <View style={styles.cardArea}>
+        <Animated.View
+          style={[styles.cardAnimated, { transform: [...pan.getTranslateTransform(), { rotate }] }]}
+          {...panResponder.panHandlers}
+        >
+          <FlipCard word={card} flipped={flipped} />
+          <Animated.View
+            pointerEvents="none"
+            style={[styles.swipeLabel, styles.swipeLabelLeft, { opacity: leftOpacity, borderColor: LEVEL_COLORS[0] }]}
+          >
+            <Text style={[styles.swipeLabelText, { color: LEVEL_COLORS[0] }]}>苦手</Text>
+          </Animated.View>
+          <Animated.View
+            pointerEvents="none"
+            style={[styles.swipeLabel, styles.swipeLabelRight, { opacity: rightOpacity, borderColor: LEVEL_COLORS[TOP_LEVEL] }]}
+          >
+            <Text style={[styles.swipeLabelText, { color: LEVEL_COLORS[TOP_LEVEL] }]}>完璧</Text>
+          </Animated.View>
+        </Animated.View>
       </View>
 
       <View style={styles.bottomArea}>
@@ -191,6 +270,18 @@ const styles = StyleSheet.create({
   progressTrack: { flex: 1, height: 5, borderRadius: 999, overflow: 'hidden' },
   progressFill: { height: '100%', borderRadius: 999 },
   cardArea: { flex: 1, padding: 22, paddingTop: 14 },
+  cardAnimated: { flex: 1 },
+  swipeLabel: {
+    position: 'absolute',
+    top: 32,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderWidth: 3,
+    borderRadius: 8,
+  },
+  swipeLabelLeft: { left: 24, transform: [{ rotate: '-15deg' }] },
+  swipeLabelRight: { right: 24, transform: [{ rotate: '15deg' }] },
+  swipeLabelText: { fontSize: 20, fontWeight: '800', letterSpacing: 1 },
   bottomArea: { padding: 18, paddingBottom: 30 },
   swipeHint: { fontSize: 12, textAlign: 'center', marginBottom: 10, fontWeight: '600' },
   levelRow: { flexDirection: 'row', gap: 8 },

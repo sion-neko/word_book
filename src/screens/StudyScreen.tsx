@@ -163,6 +163,8 @@ export default function StudyScreen({ navigation, route }: Props) {
       return acc;
     }, {} as Record<MemoryLevel, number>);
 
+    const hasChanges = ALL_LEVELS.some((lv) => (finalCounts[lv] ?? 0) !== (initialCounts[lv] ?? 0));
+
     const getDeltaColor = (lv: MemoryLevel, delta: number): string => {
       if (delta === 0 || lv < 3) return t.faint;
       return delta > 0 ? LEVEL_COLORS[4] : LEVEL_COLORS[0];
@@ -174,6 +176,12 @@ export default function StudyScreen({ navigation, route }: Props) {
           <Text style={{ color: t.faint, fontFamily: t.mono(700), fontSize: 12, letterSpacing: 2, marginBottom: 20 }}>
             RESULT
           </Text>
+
+          {!hasChanges && (
+            <Text style={{ color: t.sub, fontFamily: t.font(700), fontSize: 28, marginBottom: 16 }}>
+              変化なし
+            </Text>
+          )}
 
           <View style={[styles.resultTable, t.shadowSoft, { backgroundColor: t.surface }]}>
             {([4, 3, 2, 1, 0] as MemoryLevel[]).map((lv, i) => {

@@ -179,7 +179,7 @@ export default function StudyScreen({ navigation, route }: Props) {
 
           {!hasChanges && (
             <Text style={{ color: t.sub, fontFamily: t.font(700), fontSize: 28, marginBottom: 16 }}>
-              変化なし
+              現状維持
             </Text>
           )}
 

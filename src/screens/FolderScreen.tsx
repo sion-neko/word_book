@@ -49,6 +49,7 @@ export default function FolderScreen({ navigation, route }: Props) {
   const [words, setWords] = useState<Word[]>([]);
   const [selectedLevels, setSelectedLevels] = useState<Set<MemoryLevel>>(new Set());
   const [scopeSheet, setScopeSheet] = useState(false);
+  const [csvSheet, setCsvSheet] = useState(false);
   const [shuffle, setShuffle] = useState(false);
   const [count, setCount] = useState<CountOption>('all');
   const [selectMode, setSelectMode] = useState(false);
@@ -124,6 +125,8 @@ export default function FolderScreen({ navigation, route }: Props) {
   };
 
   const handleCSVImport = async () => {
+    setCsvSheet(false);
+    await new Promise((r) => setTimeout(r, 400));
     try {
       const parsed = await pickAndParseCSV();
       if (!parsed) return;
@@ -142,7 +145,7 @@ export default function FolderScreen({ navigation, route }: Props) {
         onBack={navigation.goBack}
         trailing={
           <View style={styles.headerActions}>
-            <TouchableOpacity onPress={handleCSVImport} style={[styles.csvBtn, { borderColor: t.hairStrong }]}>
+            <TouchableOpacity onPress={() => setCsvSheet(true)} style={[styles.csvBtn, { borderColor: t.hairStrong }]}>
               <Text style={{ color: t.sub, fontFamily: t.font(700), fontSize: 12.5 }}>CSV</Text>
             </TouchableOpacity>
             <IconButton
@@ -297,6 +300,38 @@ export default function FolderScreen({ navigation, route }: Props) {
         </View>
       </Sheet>
 
+      <Sheet visible={csvSheet} onClose={() => setCsvSheet(false)} title="CSVインポート">
+        <Text style={[styles.csvSectionLabel, { color: t.sub, fontFamily: t.font(700) }]}>ファイルの形式</Text>
+        <View style={[styles.csvCodeBox, { backgroundColor: t.pill }]}>
+          <Text style={{ color: t.ink, fontFamily: t.mono(400), fontSize: 13, lineHeight: 22 }}>
+            {'問題,答え,読み方\napple,りんご,アップル\nbanana,バナナ,バナナ'}
+          </Text>
+        </View>
+        <Text style={{ color: t.faint, fontFamily: t.font(400), fontSize: 12, marginTop: 6, marginHorizontal: 4 }}>
+          読み方は省略できます。ヘッダー行は不要です。
+        </Text>
+
+        <Text style={[styles.csvSectionLabel, { color: t.sub, fontFamily: t.font(700), marginTop: 20 }]}>PDFから作る場合</Text>
+        <Text style={{ color: t.faint, fontFamily: t.font(400), fontSize: 13, marginBottom: 8, marginHorizontal: 4 }}>
+          ChatGPTやClaudeに以下のプロンプトを貼るとCSVを自動生成できます。
+        </Text>
+        <View style={[styles.csvCodeBox, { backgroundColor: t.pill }]}>
+          <Text selectable style={{ color: t.ink, fontFamily: t.mono(400), fontSize: 12, lineHeight: 20 }}>
+            {'以下のテキストから単語帳のCSVを作成してください。\n形式は「問題,答え,読み方」の3列で、\nヘッダー行は不要です。\n\n[ここにPDFや教科書のテキストを貼り付け]'}
+          </Text>
+        </View>
+        <Text style={{ color: t.faint, fontFamily: t.font(400), fontSize: 12, marginTop: 6, marginHorizontal: 4 }}>
+          長押しでテキストをコピーできます。
+        </Text>
+
+        <TouchableOpacity
+          onPress={handleCSVImport}
+          style={[styles.csvImportBtn, { backgroundColor: t.accent }]}
+        >
+          <Text style={{ color: '#fff', fontFamily: t.font(700), fontSize: 15.5 }}>ファイルを選択</Text>
+        </TouchableOpacity>
+      </Sheet>
+
       <ConfirmDialog
         visible={confirm !== null}
         label={confirm?.label ?? ''}
@@ -324,4 +359,7 @@ const styles = StyleSheet.create({
   hint: { fontSize: 12, textAlign: 'center', marginTop: 14 },
   bulkBar: { flexDirection: 'row', gap: 10, padding: 14, paddingBottom: 28, borderTopWidth: 0.5 },
   bulkBtn: { flex: 1, height: 50, borderRadius: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7 },
+  csvSectionLabel: { fontSize: 12, letterSpacing: 0.5, marginBottom: 8, marginHorizontal: 4 },
+  csvCodeBox: { borderRadius: 10, padding: 12, marginHorizontal: 2 },
+  csvImportBtn: { height: 52, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginTop: 24, marginBottom: 4 },
 });

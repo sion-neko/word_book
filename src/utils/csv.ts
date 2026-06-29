@@ -1,5 +1,4 @@
 import * as DocumentPicker from 'expo-document-picker';
-import * as FileSystem from 'expo-file-system';
 
 function parseCSVLine(line: string): string[] {
   const result: string[] = [];
@@ -41,7 +40,8 @@ export async function pickAndParseCSV(): Promise<CSVWord[] | null> {
   if (result.canceled || result.assets.length === 0) return null;
 
   const uri = result.assets[0].uri;
-  const content = await FileSystem.readAsStringAsync(uri);
+  const response = await fetch(uri);
+  const content = await response.text();
 
   const lines = content.split(/\r?\n/).filter((l) => l.trim().length > 0);
   const words: CSVWord[] = [];

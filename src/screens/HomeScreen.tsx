@@ -72,7 +72,7 @@ export default function HomeScreen({ navigation }: Props) {
   return (
     <View style={[styles.container, { backgroundColor: t.bg }]}>
       <Header
-        large="単語帳"
+        large="問題集"
         trailing={
           <IconButton
             name="plus"

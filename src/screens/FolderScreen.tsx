@@ -132,7 +132,7 @@ export default function FolderScreen({ navigation, route }: Props) {
       if (!parsed) return;
       const importedCount = bulkCreateWords(deckId, parsed);
       reload();
-      Alert.alert('インポート完了', `${importedCount} 件の単語を追加しました`);
+      Alert.alert('インポート完了', `${importedCount} 件の問題を追加しました`);
     } catch {
       Alert.alert('エラー', 'CSVの読み込みに失敗しました');
     }
@@ -308,7 +308,7 @@ export default function FolderScreen({ navigation, route }: Props) {
           </Text>
         </View>
         <Text style={{ color: t.faint, fontFamily: t.font(400), fontSize: 12, marginTop: 6, marginHorizontal: 4 }}>
-          読み方は省略できます。ヘッダー行は不要です。ヘッダーを含めた場合は単語として登録されます。
+          読み方は省略できます。ヘッダー行は不要です。ヘッダーを含めた場合は問題として登録されます。
         </Text>
 
         <Text style={[styles.csvSectionLabel, { color: t.sub, fontFamily: t.font(700), marginTop: 20 }]}>PDFから作る場合</Text>

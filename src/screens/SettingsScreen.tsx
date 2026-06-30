@@ -99,7 +99,7 @@ export default function SettingsScreen({ navigation }: Props) {
           </View>
 
           <View style={styles.row}>
-            <Text style={[styles.rowLabel, { color: t.ink, fontFamily: t.font(600) }]}>単語間の間隔 (秒)</Text>
+            <Text style={[styles.rowLabel, { color: t.ink, fontFamily: t.font(600) }]}>問題間の間隔 (秒)</Text>
             <View style={styles.chipWrap}>
               {PAUSES.map((p) => (
                 <Chip key={p} label={String(p)} active={pauseWords === p} onPress={() => setPauseWords(p)} />

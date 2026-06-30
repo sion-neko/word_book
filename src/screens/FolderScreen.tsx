@@ -308,7 +308,7 @@ export default function FolderScreen({ navigation, route }: Props) {
           </Text>
         </View>
         <Text style={{ color: t.faint, fontFamily: t.font(400), fontSize: 12, marginTop: 6, marginHorizontal: 4 }}>
-          読み方は省略できます。ヘッダー行は不要です。
+          読み方は省略できます。ヘッダー行は不要です。ヘッダーを含めた場合は単語として登録されます。
         </Text>
 
         <Text style={[styles.csvSectionLabel, { color: t.sub, fontFamily: t.font(700), marginTop: 20 }]}>PDFから作る場合</Text>
@@ -317,7 +317,7 @@ export default function FolderScreen({ navigation, route }: Props) {
         </Text>
         <View style={[styles.csvCodeBox, { backgroundColor: t.pill }]}>
           <Text selectable style={{ color: t.ink, fontFamily: t.mono(400), fontSize: 12, lineHeight: 20 }}>
-            {'以下のテキストから単語帳のCSVを作成してください。\n形式は「問題,答え,読み方」の3列で、\nヘッダー行は不要です。\n\n[ここにPDFや教科書のテキストを貼り付け]'}
+            {'以下のテキストから問題集のCSVを作成してください。\n形式は「問題,答え,読み方」の3列で、\nヘッダー行は含めないでください。\n\n[ここにPDFや教科書のテキストを貼り付け]'}
           </Text>
         </View>
         <Text style={{ color: t.faint, fontFamily: t.font(400), fontSize: 12, marginTop: 6, marginHorizontal: 4 }}>

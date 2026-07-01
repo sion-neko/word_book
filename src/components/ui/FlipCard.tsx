@@ -13,10 +13,17 @@ interface Props {
 export default function FlipCard({ word, flipped }: Props) {
   const t = useTheme();
   const anim = useRef(new Animated.Value(flipped ? 1 : 0)).current;
+  const prevWordId = useRef(word.id);
 
   useEffect(() => {
+    if (prevWordId.current !== word.id) {
+      // カードが切り替わった場合はアニメーションさせず即座に表面へスナップする
+      prevWordId.current = word.id;
+      anim.setValue(flipped ? 1 : 0);
+      return;
+    }
     Animated.timing(anim, { toValue: flipped ? 1 : 0, duration: 550, useNativeDriver: true }).start();
-  }, [flipped]);
+  }, [word.id, flipped]);
 
   const frontRotate = anim.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '180deg'] });
   const backRotate = anim.interpolate({ inputRange: [0, 1], outputRange: ['180deg', '360deg'] });

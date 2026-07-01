@@ -27,7 +27,7 @@ export default function StudyScreen({ navigation, route }: Props) {
   const insets = useSafeAreaInsets();
   const [cards, setCards] = useState<Word[]>(route.params.words);
   const [idx, setIdx] = useState(0);
-  const [flipped, setFlipped] = useState(false);
+  const [flippedCardId, setFlippedCardId] = useState<number | null>(null);
   const [done, setDone] = useState(false);
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
   const [initialCounts, setInitialCounts] = useState<Record<MemoryLevel, number>>(() =>
@@ -46,7 +46,6 @@ export default function StudyScreen({ navigation, route }: Props) {
   const requestClose = () => setShowCloseConfirm(true);
 
   const go = (d: number) => {
-    setFlipped(false);
     if (d > 0 && idx >= cards.length - 1) {
       setDone(true);
       return;
@@ -84,7 +83,10 @@ export default function StudyScreen({ navigation, route }: Props) {
     });
   };
 
-  onTapRef.current = () => setFlipped((f) => !f);
+  onTapRef.current = () => setFlippedCardId((id) => {
+    const cardId = cards[idx]?.id;
+    return id === cardId ? null : cardId ?? null;
+  });
 
   useEffect(() => {
     pan.setValue({ x: 0, y: 0 });
@@ -150,7 +152,7 @@ export default function StudyScreen({ navigation, route }: Props) {
     setCards(subset);
     setIdx(0);
     setDone(false);
-    setFlipped(false);
+    setFlippedCardId(null);
     pan.setValue({ x: 0, y: 0 });
   };
 
@@ -238,6 +240,8 @@ export default function StudyScreen({ navigation, route }: Props) {
 
   const card = cards[Math.min(idx, cards.length - 1)];
   if (!card) return null;
+
+  const flipped = flippedCardId === card.id;
 
   return (
     <View style={[styles.container, { backgroundColor: t.bg }]}>

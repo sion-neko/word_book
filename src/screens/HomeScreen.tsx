@@ -10,10 +10,10 @@ import FolderCard from '../components/ui/FolderCard';
 import Header from '../components/ui/Header';
 import IconButton from '../components/ui/IconButton';
 import Sheet from '../components/ui/Sheet';
-import { createDeck, deleteDeck, FOLDER_COLORS, getDecks, getWeakWords, getWords, updateDeck } from '../db/database';
+import { createDeck, deleteDeck, FOLDER_COLORS, getDecks, getWords, updateDeck } from '../db/database';
 import { hexA } from '../theme/theme';
 import { useTheme } from '../theme/ThemeContext';
-import { Deck, LEVEL_COLORS, RootStackParamList, WeakWord, Word } from '../types';
+import { Deck, LEVEL_COLORS, RootStackParamList, Word } from '../types';
 
 const DANGER = LEVEL_COLORS[0];
 
@@ -25,7 +25,6 @@ export default function HomeScreen({ navigation }: Props) {
   const t = useTheme();
   const [decks, setDecks] = useState<Deck[]>([]);
   const [wordsByDeck, setWordsByDeck] = useState<Record<number, Word[]>>({});
-  const [weakWords, setWeakWords] = useState<WeakWord[]>([]);
   const [folderSheet, setFolderSheet] = useState<{ visible: boolean; deck: Deck | null }>({
     visible: false,
     deck: null,
@@ -40,7 +39,6 @@ export default function HomeScreen({ navigation }: Props) {
       map[d.id] = getWords(d.id);
     });
     setWordsByDeck(map);
-    setWeakWords(getWeakWords());
   }, []);
 
   useFocusEffect(reload);
@@ -109,32 +107,6 @@ export default function HomeScreen({ navigation }: Props) {
         )}
         ListHeaderComponent={
           <>
-            {weakWords.length > 0 && (
-              <TouchableOpacity
-                activeOpacity={0.85}
-                onPress={() => navigation.navigate('Study', { words: weakWords, title: '今日の問題' })}
-                style={[styles.reviewBtn, t.shadowSoft, { backgroundColor: t.accent }]}
-              >
-                <View style={[styles.reviewIcon, { backgroundColor: hexA('#ffffff', 0.22) }]}>
-                  <Icon name="calendar" size={22} color="#fff" strokeWidth={1.8} />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: '#fff', fontFamily: t.font(700), fontSize: 16 }}>今日の問題</Text>
-                  <Text
-                    style={{
-                      color: 'rgba(255,255,255,0.75)',
-                      fontFamily: t.mono(400),
-                      fontSize: 13,
-                      marginTop: 1,
-                    }}
-                  >
-                    {weakWords.length}問をまとめて出題
-                  </Text>
-                </View>
-                <Icon name="arrow-right" size={20} color="rgba(255,255,255,0.75)" strokeWidth={2} />
-              </TouchableOpacity>
-            )}
-
             <View style={styles.sectionHeader}>
               <Text style={[styles.sectionTitle, { color: t.sub, fontFamily: t.font(700) }]}>マイフォルダ</Text>
               <Text style={{ color: t.faint, fontFamily: t.mono(400), fontSize: 12 }}>
@@ -243,15 +215,6 @@ function FolderSheet({
 const styles = StyleSheet.create({
   container: { flex: 1 },
   listContent: { paddingHorizontal: 18, paddingBottom: 40 },
-  reviewBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    borderRadius: 20,
-    padding: 16,
-    marginBottom: 20,
-  },
-  reviewIcon: { width: 42, height: 42, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',

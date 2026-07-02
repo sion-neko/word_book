@@ -1,5 +1,5 @@
 import * as SQLite from 'expo-sqlite';
-import { Deck, MemoryLevel, Pronunciation, Word, WeakWord } from '../types';
+import { Deck, MemoryLevel, Pronunciation, Word } from '../types';
 
 const db = SQLite.openDatabaseSync('wordbook.db');
 
@@ -189,17 +189,6 @@ export function bulkCreateWords(
     }
   });
   return count;
-}
-
-// 全デッキ横断で「苦手」(未学習・難しい)な単語を取得 — Home の復習ショートカット用
-export function getWeakWords(): WeakWord[] {
-  return db.getAllSync<WeakWord>(`
-    SELECT w.*, d.name as deck_name, d.color as deck_color
-    FROM words w
-    JOIN decks d ON d.id = w.deck_id
-    WHERE w.level <= 1
-    ORDER BY w.created_at ASC
-  `);
 }
 
 // Settings operations

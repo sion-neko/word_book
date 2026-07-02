@@ -19,11 +19,6 @@ export interface Word {
   created_at: string;
 }
 
-export interface WeakWord extends Word {
-  deck_name: string;
-  deck_color: string;
-}
-
 export interface Pronunciation {
   id: number;
   term: string;
@@ -61,7 +56,7 @@ export const LEVEL_COLORS: Record<MemoryLevel, string> = {
 export const ALL_LEVELS: MemoryLevel[] = [0, 1, 2, 3, 4];
 export const TOP_LEVEL: MemoryLevel = 4;
 
-// 「苦手」= 未学習・難しい。Home の復習ショートカット/Folderの苦手バッジ/Study結果の再挑戦で共通利用。
+// 「苦手」= 未学習・難しい。Folderの苦手バッジ/Study結果の再挑戦で共通利用。
 export function isWeak(level: MemoryLevel): boolean {
   return level <= 1;
 }

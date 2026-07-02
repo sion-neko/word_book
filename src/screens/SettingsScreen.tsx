@@ -1,6 +1,6 @@
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Icon from '../components/Icon';
 import Chip from '../components/ui/Chip';
 import Header from '../components/ui/Header';
@@ -21,7 +21,7 @@ function nearest<T extends number>(arr: T[], val: number): T {
 }
 
 export default function SettingsScreen({ navigation }: Props) {
-  const { theme: t, dark, accent, setDark, setAccent } = useThemeSettings();
+  const { theme: t, accent, setAccent } = useThemeSettings();
 
   const [speed, setSpeed] = useState<number>(() =>
     nearest(SPEEDS, parseFloat(getSetting('playback_speed') ?? '1.0'))
@@ -54,11 +54,6 @@ export default function SettingsScreen({ navigation }: Props) {
       <ScrollView contentContainerStyle={styles.body}>
         <View style={[styles.section, t.shadowSoft, { backgroundColor: t.surface }]}>
           <Text style={[styles.sectionTitle, { color: t.sub, fontFamily: t.font(700) }]}>テーマ</Text>
-
-          <View style={styles.row}>
-            <Text style={[styles.rowLabel, { color: t.ink, fontFamily: t.font(600) }]}>ダークモード</Text>
-            <Switch value={dark} onValueChange={setDark} trackColor={{ true: t.accent }} />
-          </View>
 
           <View style={styles.row}>
             <Text style={[styles.rowLabel, { color: t.ink, fontFamily: t.font(600) }]}>アクセントカラー</Text>

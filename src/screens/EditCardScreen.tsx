@@ -105,6 +105,9 @@ export default function EditCardScreen({ navigation, route }: Props) {
             <AudioButton size={40} speaking={answerPreviewSpeaking} onPress={handleAnswerPreview} />
           )}
         </View>
+        <Text style={{ color: t.faint, fontFamily: t.font(400), fontSize: 12, marginBottom: 14, marginHorizontal: 4 }}>
+          全部ひらがなにすると逆に棒読みになりがちです。読み間違える漢字だけをひらがなに置き換え、他は漢字のまま残すと自然に読み上げられます。
+        </Text>
 
         <Text style={[styles.label, { color: t.sub, fontFamily: t.font(700), marginTop: 6 }]}>音声の言語</Text>
         <View style={{ marginBottom: 18 }}>

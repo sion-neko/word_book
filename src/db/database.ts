@@ -1,5 +1,5 @@
 import * as SQLite from 'expo-sqlite';
-import { Deck, MemoryLevel, Word, WeakWord } from '../types';
+import { Deck, MemoryLevel, Pronunciation, Word, WeakWord } from '../types';
 
 const db = SQLite.openDatabaseSync('wordbook.db');
 
@@ -41,6 +41,15 @@ export function initDatabase(): void {
     CREATE TABLE IF NOT EXISTS settings (
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL
+    )
+  `);
+
+  db.execSync(`
+    CREATE TABLE IF NOT EXISTS pronunciations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      term TEXT NOT NULL UNIQUE,
+      reading TEXT NOT NULL,
+      created_at TEXT DEFAULT (datetime('now', 'localtime'))
     )
   `);
 
@@ -207,4 +216,29 @@ export function getSetting(key: string): string | null {
 
 export function setSetting(key: string, value: string): void {
   db.runSync('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', [key, value]);
+}
+
+// Pronunciation dictionary operations — 読み上げ時の単語単位の読み方置換に使う
+
+export function getPronunciations(): Pronunciation[] {
+  // 長い用語ほど先に置換されるよう文字数の降順で返す(部分一致による誤置換を避けるため)
+  return db.getAllSync<Pronunciation>(
+    'SELECT * FROM pronunciations ORDER BY LENGTH(term) DESC, term ASC'
+  );
+}
+
+export function addPronunciation(term: string, reading: string): number {
+  const result = db.runSync(
+    'INSERT INTO pronunciations (term, reading) VALUES (?, ?)',
+    [term, reading]
+  );
+  return result.lastInsertRowId;
+}
+
+export function updatePronunciation(id: number, term: string, reading: string): void {
+  db.runSync('UPDATE pronunciations SET term = ?, reading = ? WHERE id = ?', [term, reading, id]);
+}
+
+export function deletePronunciation(id: number): void {
+  db.runSync('DELETE FROM pronunciations WHERE id = ?', [id]);
 }

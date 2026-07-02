@@ -5,6 +5,7 @@ import AudioModeScreen from '../screens/AudioModeScreen';
 import EditCardScreen from '../screens/EditCardScreen';
 import FolderScreen from '../screens/FolderScreen';
 import HomeScreen from '../screens/HomeScreen';
+import PronunciationDictScreen from '../screens/PronunciationDictScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import StudyScreen from '../screens/StudyScreen';
 import { useThemeSettings } from '../theme/ThemeContext';
@@ -25,6 +26,7 @@ export default function Navigation() {
         <Stack.Screen name="Folder" component={FolderScreen} />
         <Stack.Screen name="EditCard" component={EditCardScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
+        <Stack.Screen name="PronunciationDict" component={PronunciationDictScreen} />
         <Stack.Screen name="Study" component={StudyScreen} options={{ animation: 'slide_from_bottom' }} />
         <Stack.Screen name="AudioMode" component={AudioModeScreen} options={{ presentation: 'modal' }} />
       </Stack.Navigator>

@@ -1,4 +1,24 @@
 import * as Speech from 'expo-speech';
+import { getPronunciations } from '../db/database';
+
+const ASCII_TERM = /^[A-Za-z0-9]+$/;
+
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// 読み方辞書に登録された用語をすべて登録済みの読みに置換する(getPronunciationsは用語の長い順に並ぶ)
+function applyPronunciationDict(text: string): string {
+  const entries = getPronunciations();
+  return entries.reduce((result, { term, reading }) => {
+    if (!term) return result;
+    // 英数字のみの用語は単語境界(\b)で囲んで、他の単語の一部を誤って置換しないようにする
+    if (ASCII_TERM.test(term)) {
+      return result.replace(new RegExp(`\\b${escapeRegExp(term)}\\b`, 'g'), reading);
+    }
+    return result.split(term).join(reading);
+  }, text);
+}
 
 let voicesPromise: Promise<Speech.Voice[]> | null = null;
 
@@ -25,9 +45,10 @@ export async function speakText(
   rate: number = 1.0,
   language: string = 'ja-JP'
 ): Promise<void> {
+  const spoken = applyPronunciationDict(text);
   const voice = await pickVoice(language);
   return new Promise((resolve) => {
-    Speech.speak(text, {
+    Speech.speak(spoken, {
       language,
       voice,
       rate,

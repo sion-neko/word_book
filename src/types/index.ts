@@ -25,6 +25,13 @@ export interface WeakWord extends Word {
   deck_color: string;
 }
 
+export interface Pronunciation {
+  id: number;
+  term: string;
+  reading: string;
+  created_at: string;
+}
+
 export type RootStackParamList = {
   Home: undefined;
   Folder: { deckId: number; deckName: string };
@@ -32,6 +39,7 @@ export type RootStackParamList = {
   Study: { words: Word[]; title: string };
   AudioMode: { words: Word[]; title: string };
   Settings: undefined;
+  PronunciationDict: undefined;
 };
 
 export const LEVEL_LABELS: Record<MemoryLevel, string> = {

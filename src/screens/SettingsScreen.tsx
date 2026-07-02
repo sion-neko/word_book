@@ -1,6 +1,7 @@
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import Icon from '../components/Icon';
 import Chip from '../components/ui/Chip';
 import Header from '../components/ui/Header';
 import { getSetting, setSetting } from '../db/database';
@@ -109,6 +110,22 @@ export default function SettingsScreen({ navigation }: Props) {
         </View>
 
         <View style={[styles.section, t.shadowSoft, { backgroundColor: t.surface }]}>
+          <Text style={[styles.sectionTitle, { color: t.sub, fontFamily: t.font(700) }]}>読み上げ</Text>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('PronunciationDict')}
+            style={styles.linkRow}
+          >
+            <View>
+              <Text style={[styles.rowLabel, { color: t.ink, fontFamily: t.font(600) }]}>読み方辞書</Text>
+              <Text style={{ color: t.faint, fontFamily: t.font(400), fontSize: 12.5, marginTop: 2 }}>
+                「AI→エーアイ」など単語ごとの読み方を登録
+              </Text>
+            </View>
+            <Icon name="chevron" size={16} color={t.faint} strokeWidth={2} />
+          </TouchableOpacity>
+        </View>
+
+        <View style={[styles.section, t.shadowSoft, { backgroundColor: t.surface }]}>
           <Text style={[styles.sectionTitle, { color: t.sub, fontFamily: t.font(700) }]}>CSVインポート形式</Text>
           <View style={[styles.infoBox, { backgroundColor: t.surfaceAlt, borderColor: t.hair }]}>
             <Text style={{ color: t.ink, fontFamily: t.mono(500), fontSize: 14 }}>{'問題文,解答[,読み仮名]'}</Text>
@@ -128,6 +145,7 @@ const styles = StyleSheet.create({
   section: { borderRadius: 16, padding: 16, gap: 16 },
   sectionTitle: { fontSize: 12.5, letterSpacing: 0.5, textTransform: 'uppercase' },
   row: { gap: 10 },
+  linkRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   rowLabel: { fontSize: 15 },
   swatchRow: { flexDirection: 'row', gap: 12 },
   swatch: { width: 32, height: 32, borderRadius: 999 },

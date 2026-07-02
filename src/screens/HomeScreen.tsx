@@ -74,14 +74,24 @@ export default function HomeScreen({ navigation }: Props) {
       <Header
         large="問題集"
         trailing={
-          <IconButton
-            name="plus"
-            label="新規フォルダ"
-            onPress={() => setFolderSheet({ visible: true, deck: null })}
-            color={t.accentInk}
-            bg={t.accentSoft}
-            strokeWidth={2.2}
-          />
+          <>
+            <IconButton
+              name="settings"
+              label="設定"
+              onPress={() => navigation.navigate('Settings')}
+              color={t.sub}
+              bg={t.pill}
+              strokeWidth={1.8}
+            />
+            <IconButton
+              name="plus"
+              label="新規フォルダ"
+              onPress={() => setFolderSheet({ visible: true, deck: null })}
+              color={t.accentInk}
+              bg={t.accentSoft}
+              strokeWidth={2.2}
+            />
+          </>
         }
       />
 

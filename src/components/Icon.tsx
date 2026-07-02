@@ -26,7 +26,8 @@ export type IconName =
   | 'headphones'
   | 'skip-back'
   | 'skip-fwd'
-  | 'repeat';
+  | 'repeat'
+  | 'settings';
 
 interface Props {
   name: IconName;
@@ -237,6 +238,16 @@ export default function Icon({ name, size = 22, color = '#000', strokeWidth = 1.
           <Path d="M20 6H8a4 4 0 0 0-4 4v1" {...stroke} />
           <Path d="M7 21l-3-3 3-3" {...stroke} />
           <Path d="M4 18h12a4 4 0 0 0 4-4v-1" {...stroke} />
+        </Svg>
+      );
+    case 'settings':
+      return (
+        <Svg {...common}>
+          <Circle cx={12} cy={12} r={3.2} {...stroke} />
+          <Path
+            d="M19.4 13.5a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.9 2.9l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.9-2.9l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1h-.2a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.9-2.9l.1.1a1.7 1.7 0 0 0 1.9.3h.1a1.7 1.7 0 0 0 1-1.6v-.2a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.6h.1a1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.9 2.9l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1a1.7 1.7 0 0 0 1.6 1h.2a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.6 1z"
+            {...stroke}
+          />
         </Svg>
       );
     default:

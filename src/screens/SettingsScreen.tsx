@@ -123,9 +123,9 @@ export default function SettingsScreen({ navigation }: Props) {
         <View style={[styles.section, t.shadowSoft, { backgroundColor: t.surface }]}>
           <Text style={[styles.sectionTitle, { color: t.sub, fontFamily: t.font(700) }]}>CSVインポート形式</Text>
           <View style={[styles.infoBox, { backgroundColor: t.surfaceAlt, borderColor: t.hair }]}>
-            <Text style={{ color: t.ink, fontFamily: t.mono(500), fontSize: 14 }}>{'問題文,解答[,読み仮名]'}</Text>
+            <Text style={{ color: t.ink, fontFamily: t.mono(500), fontSize: 14 }}>{'問題,答え[,問題の読み方[,答えの読み方]]'}</Text>
             <Text style={{ color: t.faint, fontFamily: t.mono(400), fontSize: 12, marginTop: 6 }}>
-              {'例:\napple,りんご\napple,りんご,アップル'}
+              {'例:\napple,りんご\napple,りんご,アップル\napple,りんご,アップル,りんご'}
             </Text>
           </View>
         </View>

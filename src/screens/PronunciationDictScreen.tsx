@@ -69,7 +69,7 @@ export default function PronunciationDictScreen({ navigation }: Props) {
     const text = reading.trim();
     if (!text || previewSpeaking) return;
     setPreviewSpeaking(true);
-    await speakText(text, 1.0, 'ja-JP');
+    await speakText(text, 1.0);
     setPreviewSpeaking(false);
   };
 

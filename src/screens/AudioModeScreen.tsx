@@ -72,14 +72,14 @@ export default function AudioModeScreen({ navigation, route }: Props) {
 
       const word = list[i];
       const qText = word.reading?.trim() || word.question;
-      await speakText(qText, rateRef.current, word.lang);
+      await speakText(qText, rateRef.current);
       if (!isPlayingRef.current) break;
       await sleep(pauseQA.current * 1000);
       if (!isPlayingRef.current) break;
 
       setPhase('a');
       const aText = word.answer_reading?.trim() || word.answer;
-      await speakText(aText, rateRef.current, word.lang);
+      await speakText(aText, rateRef.current);
       if (!isPlayingRef.current) break;
       await sleep(pauseWords.current * 1000);
       if (!isPlayingRef.current) break;

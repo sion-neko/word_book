@@ -7,7 +7,6 @@ import AudioButton from '../components/ui/AudioButton';
 import ConfirmDialog from '../components/ui/ConfirmDialog';
 import Field from '../components/ui/Field';
 import Header from '../components/ui/Header';
-import Segmented from '../components/ui/Segmented';
 import { bulkDeleteWords, createWord, updateWord } from '../db/database';
 import { hexA } from '../theme/theme';
 import { useTheme } from '../theme/ThemeContext';
@@ -29,7 +28,6 @@ export default function EditCardScreen({ navigation, route }: Props) {
   const [answer, setAnswer] = useState(word?.answer ?? '');
   const [reading, setReading] = useState(word?.reading ?? '');
   const [answerReading, setAnswerReading] = useState(word?.answer_reading ?? '');
-  const [lang, setLang] = useState<'ja-JP' | 'en-US'>((word?.lang as 'ja-JP' | 'en-US') ?? 'ja-JP');
   const [level, setLevel] = useState<MemoryLevel>(word?.level ?? 0);
   const [previewSpeaking, setPreviewSpeaking] = useState(false);
   const [answerPreviewSpeaking, setAnswerPreviewSpeaking] = useState(false);
@@ -40,9 +38,9 @@ export default function EditCardScreen({ navigation, route }: Props) {
   const save = () => {
     if (!valid) return;
     if (word?.id) {
-      updateWord(word.id, question.trim(), answer.trim(), reading.trim(), lang, level, answerReading.trim());
+      updateWord(word.id, question.trim(), answer.trim(), reading.trim(), level, answerReading.trim());
     } else {
-      createWord(deckId, question.trim(), answer.trim(), reading.trim(), lang, level, answerReading.trim());
+      createWord(deckId, question.trim(), answer.trim(), reading.trim(), level, answerReading.trim());
     }
     navigation.goBack();
   };
@@ -51,7 +49,7 @@ export default function EditCardScreen({ navigation, route }: Props) {
     const text = reading.trim() || question.trim();
     if (!text || previewSpeaking) return;
     setPreviewSpeaking(true);
-    await speakText(text, 1.0, lang);
+    await speakText(text, 1.0);
     setPreviewSpeaking(false);
   };
 
@@ -59,7 +57,7 @@ export default function EditCardScreen({ navigation, route }: Props) {
     const text = answerReading.trim() || answer.trim();
     if (!text || answerPreviewSpeaking) return;
     setAnswerPreviewSpeaking(true);
-    await speakText(text, 1.0, lang);
+    await speakText(text, 1.0);
     setAnswerPreviewSpeaking(false);
   };
 
@@ -109,19 +107,7 @@ export default function EditCardScreen({ navigation, route }: Props) {
           全部ひらがなにすると逆に棒読みになりがちです。読み間違える漢字だけをひらがなに置き換え、他は漢字のまま残すと自然に読み上げられます。
         </Text>
 
-        <Text style={[styles.label, { color: t.sub, fontFamily: t.font(700), marginTop: 6 }]}>音声の言語</Text>
-        <View style={{ marginBottom: 18 }}>
-          <Segmented
-            value={lang}
-            onChange={setLang}
-            options={[
-              { value: 'ja-JP', label: '日本語' },
-              { value: 'en-US', label: '英語' },
-            ]}
-          />
-        </View>
-
-        <Text style={[styles.label, { color: t.sub, fontFamily: t.font(700) }]}>習熟度タグ</Text>
+        <Text style={[styles.label, { color: t.sub, fontFamily: t.font(700), marginTop: 6 }]}>習熟度タグ</Text>
         <View style={styles.tagRow}>
           {ALL_LEVELS.map((lv) => {
             const on = level === lv;

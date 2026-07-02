@@ -130,13 +130,12 @@ export function createWord(
   question: string,
   answer: string,
   reading: string = '',
-  lang: string = 'ja-JP',
   level: MemoryLevel = 0,
   answerReading: string = ''
 ): number {
   const result = db.runSync(
-    'INSERT INTO words (deck_id, question, answer, reading, answer_reading, lang, level) VALUES (?, ?, ?, ?, ?, ?, ?)',
-    [deckId, question, answer, reading, answerReading, lang, level]
+    'INSERT INTO words (deck_id, question, answer, reading, answer_reading, level) VALUES (?, ?, ?, ?, ?, ?)',
+    [deckId, question, answer, reading, answerReading, level]
   );
   return result.lastInsertRowId;
 }
@@ -146,13 +145,12 @@ export function updateWord(
   question: string,
   answer: string,
   reading: string,
-  lang: string = 'ja-JP',
   level: MemoryLevel = 0,
   answerReading: string = ''
 ): void {
   db.runSync(
-    'UPDATE words SET question = ?, answer = ?, reading = ?, answer_reading = ?, lang = ?, level = ? WHERE id = ?',
-    [question, answer, reading, answerReading, lang, level, id]
+    'UPDATE words SET question = ?, answer = ?, reading = ?, answer_reading = ?, level = ? WHERE id = ?',
+    [question, answer, reading, answerReading, level, id]
   );
 }
 

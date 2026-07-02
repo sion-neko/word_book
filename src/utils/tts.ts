@@ -2,9 +2,15 @@ import * as Speech from 'expo-speech';
 import { getPronunciations } from '../db/database';
 
 const ASCII_TERM = /^[A-Za-z0-9]+$/;
+// ひらがな・カタカナ・漢字を含むかどうかで日本語/英語を判定する
+const JAPANESE_CHARS = /[぀-ヿ㐀-鿿]/;
 
 function escapeRegExp(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function detectLanguage(text: string): 'ja-JP' | 'en-US' {
+  return JAPANESE_CHARS.test(text) ? 'ja-JP' : 'en-US';
 }
 
 // 読み方辞書に登録された用語をすべて登録済みの読みに置換する(getPronunciationsは用語の長い順に並ぶ)
@@ -40,12 +46,9 @@ async function pickVoice(language: string): Promise<string | undefined> {
   return (enhanced ?? candidates[0])?.identifier;
 }
 
-export async function speakText(
-  text: string,
-  rate: number = 1.0,
-  language: string = 'ja-JP'
-): Promise<void> {
+export async function speakText(text: string, rate: number = 1.0): Promise<void> {
   const spoken = applyPronunciationDict(text);
+  const language = detectLanguage(spoken);
   const voice = await pickVoice(language);
   return new Promise((resolve) => {
     Speech.speak(spoken, {

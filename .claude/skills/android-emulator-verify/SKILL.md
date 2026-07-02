@@ -21,7 +21,8 @@ version: 1.0.0
 ## 重要な原則
 
 - **すべてのadbコマンドはPowerShellで実行する。** BashはWindowsで `/sdcard/` を Git のパスと誤解釈し失敗する。
-- **タップ座標は必ず `uiautomator dump` で取得する。** スクリーンショット画像の目視推測は禁止（表示サイズと実座標が異なるため必ずずれる）。
+- **タップ座標は必ず `uiautomator dump` で取得する。** スクリーンショット画像の目視推測は禁止（表示サイズと実座標が異なるため必ずずれる）。特にフリップカードのような画面の大部分を覆う要素がある画面では、目視推測でボタンを狙ったつもりが実はカード領域内に着地し、意図と異なる操作（カードのタップ＝フリップ切り替え等）を誘発することがある。
+- **`input tap` の直後に `screencap` すると、再描画が間に合わず更新前の画面を撮ってしまうことがある。** タップの効果を確認するスクリーンショットは、タップ後に最低200〜300ms待ってから撮る（`Start-Sleep -Milliseconds 300` 等）。待たずに撮って「反応していない」と誤判定しないこと。
 - **スクリーンショットは「エミュレーター内に保存→pull」の2ステップで取る。** `exec-out screencap -p | Set-Content` はWindowsでバイナリが壊れる。
 
 ---
@@ -58,12 +59,13 @@ $listening = netstat -ano | Select-String ":8082"
 
 動いていなければ起動する（バックグラウンド）:
 
+> **注意**: `Start-Process "npx" -ArgumentList ...` は `npx` が `.cmd` ファイル（バッチスクリプト）であるため `%1 is not a valid Win32 application` エラーで失敗する。必ず `cmd.exe /c` 経由で起動すること。
+
 ```powershell
 $logFile = "$env:TEMP\expo_log.txt"
-Start-Process "npx" `
-    -ArgumentList "expo","start","--android","--port","8082" `
+Start-Process "cmd.exe" `
+    -ArgumentList "/c","npx expo start --android --port 8082 > `"$logFile`" 2>&1" `
     -WorkingDirectory "D:\sionf\private_develop\17_word_book" `
-    -RedirectStandardOutput $logFile `
     -WindowStyle Hidden
 
 # バンドル完了まで待つ
@@ -153,6 +155,8 @@ $adb = "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe"
 
 # タップ（座標はSTEP5で取得した値）
 & $adb -s emulator-5554 shell input tap 990 141
+# 効果を確認する場合はスクリーンショット前に一呼吸置く
+# Start-Sleep -Milliseconds 300
 
 # テキスト入力（日本語不可。英数字のみ）
 & $adb -s emulator-5554 shell input text "sample text"
@@ -184,8 +188,9 @@ $adb = "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe"
 | 症状 | 対処 |
 |------|------|
 | `adb not found` | フルパス `$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe` を使う |
+| `Start-Process "npx" ...` が `%1 is not a valid Win32 application` で失敗 | `npx` は `.cmd` なので直接実行できない。`Start-Process "cmd.exe" -ArgumentList "/c","npx ..."` の形にする |
 | ポート8081が使用中 | `--port 8082` を使う（スマホ向けExpoが8081を占有している） |
-| タップが反応しない | STEP5でuiautomator dumpを取り直して正確なboundsを確認する |
+| タップが反応しない（ように見える） | まず`uiautomator dump`で座標を再確認。座標が正しいのに反応がない場合は、タップ直後すぐスクリーンショットを撮っていないか疑う（再描画が間に合わずstaleな画面を撮っている可能性がある）。200〜300ms待って撮り直す |
 | Expo GoのLogin画面が出た | STEP7の手順でam startで直接URLを開く |
 | スクリーンショットが壊れる | `exec-out \| Set-Content` は使わず、`screencap -p /sdcard/X.png` + `pull` の2段階にする |
 | uiautomator dumpでエラー | `/data/local/tmp/ui.xml` を使う（`/sdcard/` だとBashがパスを誤解釈する） |

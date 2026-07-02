@@ -51,7 +51,7 @@ export default function EditCardScreen({ navigation, route }: Props) {
     const text = reading.trim() || question.trim();
     if (!text || previewSpeaking) return;
     setPreviewSpeaking(true);
-    await speakText(text, 1.0);
+    await speakText(text, 1.0, lang);
     setPreviewSpeaking(false);
   };
 
@@ -59,7 +59,7 @@ export default function EditCardScreen({ navigation, route }: Props) {
     const text = answerReading.trim() || answer.trim();
     if (!text || answerPreviewSpeaking) return;
     setAnswerPreviewSpeaking(true);
-    await speakText(text, 1.0);
+    await speakText(text, 1.0, lang);
     setAnswerPreviewSpeaking(false);
   };
 

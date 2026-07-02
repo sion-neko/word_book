@@ -29,6 +29,7 @@ export interface CSVWord {
   question: string;
   answer: string;
   reading: string;
+  answerReading: string;
 }
 
 export async function pickAndParseCSV(): Promise<CSVWord[] | null> {
@@ -51,9 +52,10 @@ export async function pickAndParseCSV(): Promise<CSVWord[] | null> {
     const question = parts[0] ?? '';
     const answer = parts[1] ?? '';
     const reading = parts[2] ?? '';
+    const answerReading = parts[3] ?? '';
 
     if (question && answer) {
-      words.push({ question, answer, reading });
+      words.push({ question, answer, reading, answerReading });
     }
   }
 

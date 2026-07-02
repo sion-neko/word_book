@@ -304,11 +304,11 @@ export default function FolderScreen({ navigation, route }: Props) {
         <Text style={[styles.csvSectionLabel, { color: t.sub, fontFamily: t.font(700) }]}>ファイルの形式</Text>
         <View style={[styles.csvCodeBox, { backgroundColor: t.pill }]}>
           <Text style={{ color: t.ink, fontFamily: t.mono(400), fontSize: 13, lineHeight: 22 }}>
-            {'問題,答え,読み方\napple,りんご,アップル\nbanana,バナナ,バナナ'}
+            {'問題,答え,問題の読み方,答えの読み方\napple,りんご,アップル,りんご\nbanana,バナナ,バナナ,バナナ'}
           </Text>
         </View>
         <Text style={{ color: t.faint, fontFamily: t.font(400), fontSize: 12, marginTop: 6, marginHorizontal: 4 }}>
-          読み方は省略できます。ヘッダー行は不要です。ヘッダーを含めた場合は問題として登録されます。
+          読み方の列は省略できます。ヘッダー行は不要です。ヘッダーを含めた場合は問題として登録されます。
         </Text>
 
         <Text style={[styles.csvSectionLabel, { color: t.sub, fontFamily: t.font(700), marginTop: 20 }]}>PDFから作る場合</Text>
@@ -317,7 +317,7 @@ export default function FolderScreen({ navigation, route }: Props) {
         </Text>
         <View style={[styles.csvCodeBox, { backgroundColor: t.pill }]}>
           <Text selectable style={{ color: t.ink, fontFamily: t.mono(400), fontSize: 12, lineHeight: 20 }}>
-            {'以下のテキストから問題集のCSVを作成してください。\n形式は「問題,答え,読み方」の3列で、\nヘッダー行は含めないでください。\n\n[ここにPDFや教科書のテキストを貼り付け]'}
+            {'以下のテキストから問題集のCSVを作成してください。\n形式は「問題,答え,問題の読み方,答えの読み方」の4列で、\nヘッダー行は含めないでください。\n\n[ここにPDFや教科書のテキストを貼り付け]'}
           </Text>
         </View>
         <Text style={{ color: t.faint, fontFamily: t.font(400), fontSize: 12, marginTop: 6, marginHorizontal: 4 }}>

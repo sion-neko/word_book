@@ -14,6 +14,7 @@ export interface Word {
   question: string;
   answer: string;
   reading: string;
+  answer_reading: string;
   lang: 'ja-JP' | 'en-US';
   level: MemoryLevel;
   created_at: string;

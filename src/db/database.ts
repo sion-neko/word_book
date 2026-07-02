@@ -29,6 +29,7 @@ export function initDatabase(): void {
       question TEXT NOT NULL,
       answer TEXT NOT NULL,
       reading TEXT DEFAULT '',
+      answer_reading TEXT DEFAULT '',
       lang TEXT DEFAULT 'ja-JP',
       level INTEGER DEFAULT 0,
       created_at TEXT DEFAULT (datetime('now', 'localtime')),
@@ -49,6 +50,9 @@ export function initDatabase(): void {
   }
   if (!columnExists('words', 'lang')) {
     db.execSync(`ALTER TABLE words ADD COLUMN lang TEXT DEFAULT 'ja-JP'`);
+  }
+  if (!columnExists('words', 'answer_reading')) {
+    db.execSync(`ALTER TABLE words ADD COLUMN answer_reading TEXT DEFAULT ''`);
   }
 
   db.execSync(`
@@ -118,11 +122,12 @@ export function createWord(
   answer: string,
   reading: string = '',
   lang: string = 'ja-JP',
-  level: MemoryLevel = 0
+  level: MemoryLevel = 0,
+  answerReading: string = ''
 ): number {
   const result = db.runSync(
-    'INSERT INTO words (deck_id, question, answer, reading, lang, level) VALUES (?, ?, ?, ?, ?, ?)',
-    [deckId, question, answer, reading, lang, level]
+    'INSERT INTO words (deck_id, question, answer, reading, answer_reading, lang, level) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    [deckId, question, answer, reading, answerReading, lang, level]
   );
   return result.lastInsertRowId;
 }
@@ -133,11 +138,12 @@ export function updateWord(
   answer: string,
   reading: string,
   lang: string = 'ja-JP',
-  level: MemoryLevel = 0
+  level: MemoryLevel = 0,
+  answerReading: string = ''
 ): void {
   db.runSync(
-    'UPDATE words SET question = ?, answer = ?, reading = ?, lang = ?, level = ? WHERE id = ?',
-    [question, answer, reading, lang, level, id]
+    'UPDATE words SET question = ?, answer = ?, reading = ?, answer_reading = ?, lang = ?, level = ? WHERE id = ?',
+    [question, answer, reading, answerReading, lang, level, id]
   );
 }
 
@@ -163,14 +169,14 @@ export function bulkUpdateWordLevel(ids: number[], level: MemoryLevel): void {
 
 export function bulkCreateWords(
   deckId: number,
-  entries: Array<{ question: string; answer: string; reading?: string }>
+  entries: Array<{ question: string; answer: string; reading?: string; answerReading?: string }>
 ): number {
   let count = 0;
   db.withTransactionSync(() => {
     for (const e of entries) {
       db.runSync(
-        'INSERT INTO words (deck_id, question, answer, reading) VALUES (?, ?, ?, ?)',
-        [deckId, e.question, e.answer, e.reading ?? '']
+        'INSERT INTO words (deck_id, question, answer, reading, answer_reading) VALUES (?, ?, ?, ?, ?)',
+        [deckId, e.question, e.answer, e.reading ?? '', e.answerReading ?? '']
       );
       count++;
     }

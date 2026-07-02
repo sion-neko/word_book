@@ -28,9 +28,11 @@ export default function EditCardScreen({ navigation, route }: Props) {
   const [question, setQuestion] = useState(word?.question ?? '');
   const [answer, setAnswer] = useState(word?.answer ?? '');
   const [reading, setReading] = useState(word?.reading ?? '');
+  const [answerReading, setAnswerReading] = useState(word?.answer_reading ?? '');
   const [lang, setLang] = useState<'ja-JP' | 'en-US'>((word?.lang as 'ja-JP' | 'en-US') ?? 'ja-JP');
   const [level, setLevel] = useState<MemoryLevel>(word?.level ?? 0);
   const [previewSpeaking, setPreviewSpeaking] = useState(false);
+  const [answerPreviewSpeaking, setAnswerPreviewSpeaking] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const valid = question.trim().length > 0 && answer.trim().length > 0;
@@ -38,9 +40,9 @@ export default function EditCardScreen({ navigation, route }: Props) {
   const save = () => {
     if (!valid) return;
     if (word?.id) {
-      updateWord(word.id, question.trim(), answer.trim(), reading.trim(), lang, level);
+      updateWord(word.id, question.trim(), answer.trim(), reading.trim(), lang, level, answerReading.trim());
     } else {
-      createWord(deckId, question.trim(), answer.trim(), reading.trim(), lang, level);
+      createWord(deckId, question.trim(), answer.trim(), reading.trim(), lang, level, answerReading.trim());
     }
     navigation.goBack();
   };
@@ -51,6 +53,14 @@ export default function EditCardScreen({ navigation, route }: Props) {
     setPreviewSpeaking(true);
     await speakText(text, 1.0);
     setPreviewSpeaking(false);
+  };
+
+  const handleAnswerPreview = async () => {
+    const text = answerReading.trim() || answer.trim();
+    if (!text || answerPreviewSpeaking) return;
+    setAnswerPreviewSpeaking(true);
+    await speakText(text, 1.0);
+    setAnswerPreviewSpeaking(false);
   };
 
   const handleDelete = () => {
@@ -80,10 +90,19 @@ export default function EditCardScreen({ navigation, route }: Props) {
 
         <View style={styles.readingRow}>
           <View style={{ flex: 1 }}>
-            <Field label="音声の読み(任意)" value={reading} onChangeText={setReading} placeholder="未入力なら表を読み上げます" />
+            <Field label="表の音声の読み(任意)" value={reading} onChangeText={setReading} placeholder="未入力なら表を読み上げます" />
           </View>
           {(reading.trim() || question.trim()) && (
             <AudioButton size={40} speaking={previewSpeaking} onPress={handlePreview} />
+          )}
+        </View>
+
+        <View style={styles.readingRow}>
+          <View style={{ flex: 1 }}>
+            <Field label="裏の音声の読み(任意)" value={answerReading} onChangeText={setAnswerReading} placeholder="未入力なら裏を読み上げます" />
+          </View>
+          {(answerReading.trim() || answer.trim()) && (
+            <AudioButton size={40} speaking={answerPreviewSpeaking} onPress={handleAnswerPreview} />
           )}
         </View>
 

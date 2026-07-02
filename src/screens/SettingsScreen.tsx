@@ -119,16 +119,6 @@ export default function SettingsScreen({ navigation }: Props) {
             <Icon name="chevron" size={16} color={t.faint} strokeWidth={2} />
           </TouchableOpacity>
         </View>
-
-        <View style={[styles.section, t.shadowSoft, { backgroundColor: t.surface }]}>
-          <Text style={[styles.sectionTitle, { color: t.sub, fontFamily: t.font(700) }]}>CSVインポート形式</Text>
-          <View style={[styles.infoBox, { backgroundColor: t.surfaceAlt, borderColor: t.hair }]}>
-            <Text style={{ color: t.ink, fontFamily: t.mono(500), fontSize: 14 }}>{'問題,答え[,問題の読み方[,答えの読み方]]'}</Text>
-            <Text style={{ color: t.faint, fontFamily: t.mono(400), fontSize: 12, marginTop: 6 }}>
-              {'例:\napple,りんご\napple,りんご,アップル\napple,りんご,アップル,りんご'}
-            </Text>
-          </View>
-        </View>
       </ScrollView>
     </View>
   );
@@ -145,5 +135,4 @@ const styles = StyleSheet.create({
   swatchRow: { flexDirection: 'row', gap: 12 },
   swatch: { width: 32, height: 32, borderRadius: 999 },
   chipWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  infoBox: { borderRadius: 10, padding: 12, borderWidth: 1 },
 });

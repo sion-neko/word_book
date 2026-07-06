@@ -2,6 +2,7 @@ import { RouteProp, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   ScrollView,
   StyleSheet,
@@ -22,6 +23,7 @@ import { bulkCreateWords, bulkDeleteWords, bulkUpdateWordLevel, getWords } from 
 import { hexA } from '../theme/theme';
 import { useTheme } from '../theme/ThemeContext';
 import { ALL_LEVELS, LEVEL_COLORS, LEVEL_LABELS, MemoryLevel, RootStackParamList, TOP_LEVEL, Word } from '../types';
+import { exportDeckAudio } from '../utils/audioExport';
 import { pickAndParseCSV } from '../utils/csv';
 
 type Props = {
@@ -55,6 +57,7 @@ export default function FolderScreen({ navigation, route }: Props) {
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [confirm, setConfirm] = useState<{ ids: number[]; label: string } | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   const reload = useCallback(() => setWords(getWords(deckId)), [deckId]);
   useFocusEffect(reload);
@@ -122,6 +125,18 @@ export default function FolderScreen({ navigation, route }: Props) {
     setConfirm(null);
     exitSelect();
     reload();
+  };
+
+  const handleExportAudio = async () => {
+    if (exporting) return;
+    setExporting(true);
+    try {
+      await exportDeckAudio(deckName, pick());
+    } catch (e) {
+      Alert.alert('エラー', e instanceof Error ? e.message : '音声の書き出しに失敗しました');
+    } finally {
+      setExporting(false);
+    }
   };
 
   const handleCSVImport = async () => {
@@ -207,6 +222,17 @@ export default function FolderScreen({ navigation, route }: Props) {
                 style={[styles.squareBtn, { borderColor: t.hairStrong, backgroundColor: t.surface, opacity: playable === 0 ? 0.4 : 1 }]}
               >
                 <Icon name="headphones" size={22} color={t.ink} strokeWidth={1.8} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                disabled={playable === 0 || exporting}
+                onPress={handleExportAudio}
+                style={[styles.squareBtn, { borderColor: t.hairStrong, backgroundColor: t.surface, opacity: playable === 0 || exporting ? 0.4 : 1 }]}
+              >
+                {exporting ? (
+                  <ActivityIndicator color={t.ink} />
+                ) : (
+                  <Icon name="download" size={22} color={t.ink} strokeWidth={1.8} />
+                )}
               </TouchableOpacity>
             </View>
           </>

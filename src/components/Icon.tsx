@@ -27,7 +27,8 @@ export type IconName =
   | 'skip-back'
   | 'skip-fwd'
   | 'repeat'
-  | 'settings';
+  | 'settings'
+  | 'download';
 
 interface Props {
   name: IconName;
@@ -238,6 +239,13 @@ export default function Icon({ name, size = 22, color = '#000', strokeWidth = 1.
           <Path d="M20 6H8a4 4 0 0 0-4 4v1" {...stroke} />
           <Path d="M7 21l-3-3 3-3" {...stroke} />
           <Path d="M4 18h12a4 4 0 0 0 4-4v-1" {...stroke} />
+        </Svg>
+      );
+    case 'download':
+      return (
+        <Svg {...common}>
+          <Path d="M12 4v11M8 11l4 4 4-4" {...stroke} />
+          <Path d="M5 18.5h14" {...stroke} />
         </Svg>
       );
     case 'settings':

@@ -1,0 +1,7 @@
+{
+  "name": "speech-export",
+  "version": "0.1.0",
+  "description": "On-device speech synthesis export to an audio file (iOS only)",
+  "main": "index.ts",
+  "license": "MIT"
+}

@@ -46,10 +46,22 @@ async function pickVoice(language: string): Promise<string | undefined> {
   return (enhanced ?? candidates[0])?.identifier;
 }
 
-export async function speakText(text: string, rate: number = 1.0): Promise<void> {
+export type PreparedUtterance = {
+  text: string;
+  language: 'ja-JP' | 'en-US';
+  voice?: string;
+};
+
+// 発音辞書の適用・言語判定・音声選択をまとめる(speakTextと音声書き出しの両方で使う)
+export async function prepareUtterance(text: string): Promise<PreparedUtterance> {
   const spoken = applyPronunciationDict(text);
   const language = detectLanguage(spoken);
   const voice = await pickVoice(language);
+  return { text: spoken, language, voice };
+}
+
+export async function speakText(text: string, rate: number = 1.0): Promise<void> {
+  const { text: spoken, language, voice } = await prepareUtterance(text);
   return new Promise((resolve) => {
     Speech.speak(spoken, {
       language,

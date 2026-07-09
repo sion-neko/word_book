@@ -46,6 +46,15 @@ async function pickVoice(language: string): Promise<string | undefined> {
   return (enhanced ?? candidates[0])?.identifier;
 }
 
+// 日本語のEnhanced(拡張)品質ボイスが端末にあるか。
+// 無ければDefault品質で読み上げているので、ダウンロードを案内する余地がある
+export async function hasEnhancedJapaneseVoice(): Promise<boolean> {
+  const voices = await loadVoices();
+  return voices.some(
+    (v) => v.language?.split('-')[0] === 'ja' && v.quality === Speech.VoiceQuality.Enhanced
+  );
+}
+
 export type PreparedUtterance = {
   text: string;
   language: 'ja-JP' | 'en-US';

@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Platform,
   ScrollView,
   StyleSheet,
   Switch,
@@ -18,13 +19,15 @@ import Header from '../components/ui/Header';
 import IconButton from '../components/ui/IconButton';
 import Sheet from '../components/ui/Sheet';
 import SplitButton from '../components/ui/SplitButton';
+import VoiceHintDialog from '../components/ui/VoiceHintDialog';
 import WordRow from '../components/ui/WordRow';
-import { bulkCreateWords, bulkDeleteWords, bulkUpdateWordLevel, getWords } from '../db/database';
+import { bulkCreateWords, bulkDeleteWords, bulkUpdateWordLevel, getSetting, getWords, setSetting } from '../db/database';
 import { hexA } from '../theme/theme';
 import { useTheme } from '../theme/ThemeContext';
 import { ALL_LEVELS, LEVEL_COLORS, LEVEL_LABELS, MemoryLevel, RootStackParamList, TOP_LEVEL, Word } from '../types';
 import { exportDeckAudio } from '../utils/audioExport';
 import { pickAndParseCSV } from '../utils/csv';
+import { hasEnhancedJapaneseVoice } from '../utils/tts';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Folder'>;
@@ -58,6 +61,7 @@ export default function FolderScreen({ navigation, route }: Props) {
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [confirm, setConfirm] = useState<{ ids: number[]; label: string } | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [voiceHintAction, setVoiceHintAction] = useState<(() => void) | null>(null);
 
   const reload = useCallback(() => setWords(getWords(deckId)), [deckId]);
   useFocusEffect(reload);
@@ -125,6 +129,19 @@ export default function FolderScreen({ navigation, route }: Props) {
     setConfirm(null);
     exitSelect();
     reload();
+  };
+
+  // Default品質のボイスしか無いiOS端末では、再生/書き出しの前にKyoko(拡張)の案内を挟む
+  const runWithVoiceHint = async (action: () => void) => {
+    if (
+      Platform.OS === 'ios' &&
+      getSetting('voice_hint_dismissed') !== '1' &&
+      !(await hasEnhancedJapaneseVoice())
+    ) {
+      setVoiceHintAction(() => action);
+    } else {
+      action();
+    }
   };
 
   const handleExportAudio = async () => {
@@ -218,14 +235,16 @@ export default function FolderScreen({ navigation, route }: Props) {
               </View>
               <TouchableOpacity
                 disabled={playable === 0}
-                onPress={() => navigation.navigate('AudioMode', { words: pick(), title: deckName })}
+                onPress={() =>
+                  runWithVoiceHint(() => navigation.navigate('AudioMode', { words: pick(), title: deckName }))
+                }
                 style={[styles.squareBtn, { borderColor: t.hairStrong, backgroundColor: t.surface, opacity: playable === 0 ? 0.4 : 1 }]}
               >
                 <Icon name="headphones" size={22} color={t.ink} strokeWidth={1.8} />
               </TouchableOpacity>
               <TouchableOpacity
                 disabled={playable === 0 || exporting}
-                onPress={handleExportAudio}
+                onPress={() => runWithVoiceHint(handleExportAudio)}
                 style={[styles.squareBtn, { borderColor: t.hairStrong, backgroundColor: t.surface, opacity: playable === 0 || exporting ? 0.4 : 1 }]}
               >
                 {exporting ? (
@@ -364,6 +383,16 @@ export default function FolderScreen({ navigation, route }: Props) {
         confirmColor={DANGER}
         onCancel={() => setConfirm(null)}
         onConfirm={confirmDelete}
+      />
+
+      <VoiceHintDialog
+        visible={voiceHintAction !== null}
+        onClose={(dontShowAgain) => {
+          if (dontShowAgain) setSetting('voice_hint_dismissed', '1');
+          const action = voiceHintAction;
+          setVoiceHintAction(null);
+          action?.();
+        }}
       />
     </View>
   );

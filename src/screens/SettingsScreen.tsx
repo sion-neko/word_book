@@ -1,6 +1,6 @@
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Icon from '../components/Icon';
 import Chip from '../components/ui/Chip';
 import Header from '../components/ui/Header';
@@ -118,6 +118,17 @@ export default function SettingsScreen({ navigation }: Props) {
             </View>
             <Icon name="chevron" size={16} color={t.faint} strokeWidth={2} />
           </TouchableOpacity>
+
+          {Platform.OS === 'ios' && (
+            <View style={styles.row}>
+              <Text style={[styles.rowLabel, { color: t.ink, fontFamily: t.font(600) }]}>
+                音声を自然にする
+              </Text>
+              <Text style={{ color: t.faint, fontFamily: t.font(400), fontSize: 12.5 }}>
+                iPhoneの「設定 → アクセシビリティ → 読み上げコンテンツ → 声 → 日本語」から「Kyoko(拡張)」をダウンロードすると、より自然な声で読み上げられます(ダウンロード後は自動で使われます)
+              </Text>
+            </View>
+          )}
         </View>
       </ScrollView>
     </View>

@@ -118,10 +118,15 @@ public final class SpeechExportModule: Module {
   private func synthesize(_ utterance: AVSpeechUtterance) async -> [AVAudioPCMBuffer] {
     await withCheckedContinuation { continuation in
       var buffers: [AVAudioPCMBuffer] = []
+      // iOS 26では終端を示す空バッファがコールバックに複数回渡ってくることがあり、
+      // そのままresumeするとCheckedContinuationの二重resumeでクラッシュする
+      var resumed = false
       let synthesizer = AVSpeechSynthesizer()
       activeSynthesizers.append(synthesizer)
       synthesizer.write(utterance) { audioBuffer in
+        guard !resumed else { return }
         guard let pcmBuffer = audioBuffer as? AVAudioPCMBuffer, pcmBuffer.frameLength > 0 else {
+          resumed = true
           continuation.resume(returning: buffers)
           return
         }
